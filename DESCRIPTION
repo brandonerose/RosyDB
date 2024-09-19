@@ -15,6 +15,7 @@ Imports:
     magrittr,
     RosyApp,
     RosyUtils,
+    rstudioapi,
     shiny,
     table1,
     utils

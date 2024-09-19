@@ -1,5 +1,5 @@
-#' Run the Shiny Application
-#'
+#' @import RosyUtils
+#' @import RosyApp
 #' @param ... arguments to pass to golem_opts.
 #' See `?golem::get_golem_options` for more details.
 #' @inheritParams shiny::shinyApp

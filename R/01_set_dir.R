@@ -1,3 +1,5 @@
+#' @import RosyUtils
+#' @import RosyApp
 clean_dir_path <- function(dir_path){
   if ( ! is.character(dir_path)) stop("dir must be a character string")
   dir_path <- dir_path %>% trimws(whitespace = "[\\h\\v]") %>% normalizePath( winslash = "/",mustWork = F)
@@ -48,4 +50,12 @@ get_dir <- function(DB){
   # if()
   validate_dir(dir_path,silent=T)
   dir_path
+}
+#' @title nav_to_dir
+#' @inheritParams save_DB
+#' @return opens browser link
+#' @export
+nav_to_dir <- function(DB){
+  rstudioapi::filesPaneNavigate(DB$dir_path)
+  utils::browseURL(DB$dir_path)
 }
