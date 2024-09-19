@@ -2,7 +2,11 @@
 
 export("%>%")
 export(get_dir)
+export(make_table1_DB)
 export(run_app)
+export(sidebar_choices)
+import(RosyApp)
+import(RosyUtils)
 import(shiny)
 importFrom(golem,activate_js)
 importFrom(golem,add_resource_path)
