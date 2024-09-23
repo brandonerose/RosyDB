@@ -15,15 +15,6 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       arms=NULL,
       events=NULL,
       event_mapping = NULL,
-      remap = list(
-        forms=NULL,
-        fields=NULL,
-        choices=NULL,
-        forms_key_cols = NULL,
-        arms=NULL,
-        events=NULL,
-        event_mapping = NULL
-      ),
       missing_codes=NULL
     ),
     data = NULL, #model
@@ -57,34 +48,14 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       thecodingdocs = "https://www.thecodingdocs.com/"
     )
   )
-  # redcap = list(
-  #   token_name=NULL,
-  #   project_id=NULL,
-  #   project_title= NULL,
-  #   id_col=NULL,
-  #   version=NULL,
-  #   project_info=NULL,
-  #   log=NULL,
-  #   users=NULL,
-  #   current_user=NULL,
-  #   choices=NULL,
-  #   raw_structure_cols = NULL,
-  #   is_longitudinal = NULL,
-  #   has_arms = NULL,
-  #   has_multiple_arms = NULL,
-  #   has_arms_that_matter = NULL,
-  #   has_repeating_instruments_or_events = NULL,
-  #   has_repeating_instruments = NULL,
-  #   has_repeating_events = NULL
-  # ),
 }
-validate_DB <- function(DB,silent = T,warn_only = F){
+validate_DB <- function(DB,silent = T,warn_only = F,allowed_names = names(blank_DB())){
   #param check
   if( ! is.list(DB)) stop("DB must be a list")
   #function
   outcome_valid <- T
   messages <- NULL
-  if( ! all(names(blank_DB())%in%names(DB))){
+  if( ! all(allowed_names%in%names(DB))){
     outcome_valid <- F
     messages <- messages %>% append("`DB` does not have the appropriate names. Did you use `load_DB()` or `setup_DB()` to generate it?")
   }

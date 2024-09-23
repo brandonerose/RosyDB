@@ -2,7 +2,7 @@
 % Please edit documentation in R/05_save_DB.R
 \name{drop_DB_to_dir}
 \alias{drop_DB_to_dir}
-\title{Shows DB in the env}
+\title{drop_DB_to_dir}
 \usage{
 drop_DB_to_dir(
   DB,
@@ -13,36 +13,9 @@ drop_DB_to_dir(
   file_name
 )
 }
-\arguments{
-\item{DB}{object generated using `load_DB()` or `setup_DB()`}
-
-\item{include_metadata}{logical for whether to only include redcap and not metadata}
-
-\item{forms}{optional character vector for only selected forms}
-
-\item{str_trunc_length}{optional integer for truncation}
-
-\item{file_name}{optional character string for adding to the front of file names}
-
-\item{records}{character vector of records you want dropped to your directory}
-
-\item{allow_mod}{logical for whether non-instrument names are allowed}
-
-\item{deidentify}{logical for deidentification}
-
-\item{dir_other}{optional character string of another file path where the files should be saved}
-
-\item{smart}{logical for whether to only save when data is new}
-
-\item{include_other}{logical for whether to only include redcap and not metadata}
-
-\item{with_links}{optional logical for including links in excel sheets}
-
-\item{merge_non_repeating}{optional logical for merging non-repeating instruments}
-}
 \value{
 messages for confirmation
 }
 \description{
-Shows DB in the env
+drop_DB_to_dir
 }

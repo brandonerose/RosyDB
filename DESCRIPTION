@@ -16,7 +16,6 @@ Imports:
     hoardr,
     magrittr,
     openxlsx,
-    readxl,
     RosyApp,
     RosyREDCap,
     RosyUtils,
