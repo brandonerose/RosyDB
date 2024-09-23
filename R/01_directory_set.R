@@ -1,4 +1,5 @@
 #' @import RosyUtils
+dir_folders <- c("R_objects","output","scripts","input")
 validate_dir <- function(dir_path,silent=T){
   #param check
   dir_path <- clean_dir_path(dir_path)
@@ -7,7 +8,7 @@ validate_dir <- function(dir_path,silent=T){
   #function
   if( ! silent) message("directory --> '",dir_path,"'")
   stop_mes <- "Did you use `set_dir()`?"
-  for(folder in c("R_objects","output","scripts","input")){
+  for(folder in dir_folders){
     if ( ! file.exists(file.path(dir_path,folder))) stop("'",dir_path,"/",folder,"' missing! ",stop_mes)
   }
   # if ( ! file.exists(file.path(dir_path,"ref_tables"))) stop("'",dir_path,"/ref_tables' missing! ",stop_mes)
@@ -29,12 +30,12 @@ set_dir <- function(dir_path){
       stop("Path not found. Use absolute path or choose one within R project working directory.")
     }
   }
-  for(folder in c("R_objects","output","scripts","input")){
+  for(folder in dir_folders){
     if ( ! file.exists(file.path(dir_path,folder))) {
       dir.create(file.path(dir_path,folder),showWarnings = F)
     }
   }
-  validate_dir(dir_path,silent=F)
+  return(validate_dir(dir_path,silent=F))
 }
 #' @title get your directory
 #' @inheritParams save_DB
@@ -46,9 +47,7 @@ get_dir <- function(DB){
     warning("Searched for directory --> '",dir_path,"' ...")
     stop(paste0("Does not exist. ", stop_mes))
   }
-  # if()
-  validate_dir(dir_path,silent=T)
-  dir_path
+  return(validate_dir(dir_path,silent=T))
 }
 #' @title nav_to_dir
 #' @return opens browser link

@@ -8,6 +8,9 @@ sidebar_choices(DB, n_threshold = 1)
 
 sidebar_choices(DB, n_threshold = 1)
 }
+\arguments{
+\item{DB}{object generated using `load_DB()` or `setup_DB()`}
+}
 \description{
 get sidebar_choices directory
 
