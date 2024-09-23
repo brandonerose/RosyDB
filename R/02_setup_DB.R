@@ -47,7 +47,7 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       data_extract_labelled = NULL,
       data_extract_merged = NULL,
       merge_form_name = "merged",
-      reference_state = "data_extract",
+      reference_state = "data",
       reference_metadata = "redcap",
       was_remapped = F,
       use_csv = F
@@ -145,7 +145,7 @@ setup_DB <- function(short_name,dir_path,validate = T,use_csv = F){
   DB$short_name <- validate_env_name(short_name)
   if(validate)DB <- validate_DB(DB)
   DB$internals$use_csv <- use_csv
-  DB$data <- DB$data_extract %>% all_character_cols_list()
+  DB$data <- DB$data %>% all_character_cols_list()
   return(DB)
 }
 #' @title Reads DB from the directory
@@ -155,15 +155,12 @@ setup_DB <- function(short_name,dir_path,validate = T,use_csv = F){
 load_DB <- function(short_name,validate = T){
   projects <- get_projects()
   if(nrow(projects)==0)return(blank_DB())
-  #
-  # DB_path <- file.path(dir_path,"R_objects","DB.rdata")
-  # if(file.exists(DB_path)){
-  #   DB  <- readRDS(file=DB_path)
-  #   DB <- validate_DB(DB,silent = F,warn_only = !validate)
-  # }else{
-  #   DB <- blank_DB()
-  # }
-  DB
+  if(!short_name%in%projects$short_name)return(blank_DB())
+  DB_path <- file.path(DB$dir_path,"R_objects",paste0(short_name,".rdata"))
+  if(!file.exists(DB_path))return(blank_DB())
+  readRDS(file=DB_path) %>%
+    validate_DB(silent = F, warn_only = !validate) %>%
+    return()
 }
 #' @title Saves DB in the directory
 #' @param DB object generated using `load_DB()` or `setup_DB()`
@@ -174,16 +171,16 @@ save_DB <- function(DB){
   if( ! is.list(DB)) stop("DB must be a list")
   #function
   DB <- DB %>% validate_DB()
-  DB$data_extract <- DB$data_extract %>% all_character_cols_list()
-  DB %>% saveRDS(file=file.path(DB$dir_path,"R_objects","DB.rdata"))
+  DB$data <- DB$data %>% all_character_cols_list()
+  DB %>% saveRDS(file=file.path(DB$dir_path,"R_objects",paste0(DB$short_name,".rdata")))
   add_project(DB)
   # save_xls_wrapper(DB)
-  message("Saved!")
+  bullet_in_console(paste0("Saved ",DB$short_name," to directory!"),file = DB$dir_path,bullet_type = "v")
 }
 #' @title Shows DB in the env
 #' @inheritParams save_DB
 #' @param also_metadata logical for including metadata
-#' @param data_choice whether to use 'data_extract' or 'data_transform'
+#' @param data_choice whether to use 'data' or 'data_transform'
 #' @param only_dfs logical for including data.frames
 #' @return DB tables
 #' @export
