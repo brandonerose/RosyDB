@@ -1,6 +1,8 @@
 #' @import RosyUtils
 #' @import RosyDB
 #' @import RosyApp
+#' @title annotate_fields
+#' @export
 annotate_fields <- function(DB,skim= T){
   DB$metadata$fields$field_label[which(is.na(DB$metadata$fields$field_label))] <- metadata$field_name[which(is.na(DB$metadata$fields$field_label))]
   metadata  <- unique(metadata$form_name) %>%
@@ -34,6 +36,8 @@ annotate_fields <- function(DB,skim= T){
   }
   return(metadata)
 }
+#' @title fields_to_choices
+#' @export
 fields_to_choices <- function(metadata){
   rows_with_choices <- which(metadata$field_type%in%c("radio","dropdown","checkbox_choice","yesno"))
   codebook <- NULL
@@ -52,6 +56,8 @@ fields_to_choices <- function(metadata){
   rownames(codebook) <- NULL
   return(codebook)
 }
+#' @title annotate_forms
+#' @export
 annotate_forms <- function(DB,instruments){
   choice <- "instrument_name"
   if("former_instrument_names" %in% colnames(instruments)){
@@ -66,6 +72,8 @@ annotate_forms <- function(DB,instruments){
   }
   return(instruments)
 }
+#' @title annotate_choices
+#' @export
 annotate_choices <- function(codebook,metadata,data_choice="data",DB){
   codebook <- unique(metadata$field_name) %>%
     lapply(function(IN){
@@ -172,6 +180,8 @@ clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
   }
   return(DB)
 }
+#' @title clean_DF
+#' @export
 clean_DF <- function(DF,drop_blanks = T,drop_unknowns = T){
   for(COLUMN in colnames(DF)){
     if(COLUMN %in% metadata$field_name){
