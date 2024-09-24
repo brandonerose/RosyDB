@@ -110,7 +110,7 @@ setup_DB <- function(short_name,dir_path,validate = T,use_csv = F){
     DB <- blank_DB()
   }
   if( ! missing_dir_path){
-    DB <- load_DB(dir_path,validate = validate)
+    DB <- load_DB(short_name = short_name,validate = validate)
     DB$dir_path <- set_dir(dir_path)
   }
   DB$short_name <- validate_env_name(short_name)
