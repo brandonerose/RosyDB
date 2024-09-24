@@ -11,7 +11,7 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       forms=NULL,
       fields=NULL,
       choices=NULL,
-      forms_key_cols = NULL,
+      form_key_cols = NULL,
       arms=NULL,
       events=NULL,
       event_mapping = NULL,
@@ -155,15 +155,12 @@ save_DB <- function(DB){
 #' @param only_dfs logical for including data.frames
 #' @return DB tables
 #' @export
-show_DB <- function(DB,data_choice,also_metadata=T,only_dfs = T){
+show_DB <- function(DB,also_metadata=T,only_dfs = T){
   DB <- validate_DB(DB)
   data_list <- list()
-  if(missing(data_choice)){
-    data_choice<- DB$internals$reference_state
-  }
-  DB[[data_choice]] %>% add_list_to_global(only_dfs = only_dfs)
+  DB[[data]] %>% add_list_to_global(only_dfs = only_dfs)
   if(also_metadata){
-    DB[["redcap"]] %>% add_list_to_global(only_dfs = only_dfs)
+    DB[["metadata"]] %>% add_list_to_global(only_dfs = only_dfs)
   }
   data_list %>% list2env(envir = .GlobalEnv)
 }

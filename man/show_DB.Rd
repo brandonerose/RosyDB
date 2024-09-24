@@ -4,16 +4,16 @@
 \alias{show_DB}
 \title{Shows DB in the env}
 \usage{
-show_DB(DB, data_choice, also_metadata = T, only_dfs = T)
+show_DB(DB, also_metadata = T, only_dfs = T)
 }
 \arguments{
 \item{DB}{object generated using `load_DB()` or `setup_DB()`}
 
-\item{data_choice}{whether to use 'data' or 'data_transform'}
-
 \item{also_metadata}{logical for including metadata}
 
 \item{only_dfs}{logical for including data.frames}
+
+\item{data_choice}{whether to use 'data' or 'data_transform'}
 }
 \value{
 DB tables
