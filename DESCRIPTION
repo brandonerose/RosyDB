@@ -16,11 +16,13 @@ Imports:
     hoardr,
     magrittr,
     openxlsx,
+    rmarkdown,
     RosyApp,
     RosyREDCap,
     RosyUtils,
     rstudioapi,
     shiny,
+    skimr,
     table1,
     utils
 Remotes: 
