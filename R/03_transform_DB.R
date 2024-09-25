@@ -109,3 +109,21 @@ purify_names_df_list <- function(named_df_list,instruments_remap,metadata,merge_
   }
   return(named_df_list)
 }
+#' @title remove_records_from_list
+#' @export
+remove_records_from_list <- function(data_list,records,id_col,silent=F){
+  if(!is_df_list(data_list))stop("data_list is not a list of data.frames as expected.")
+  if(length(records)==0)stop("no records supplied to remove_records_from_list, but it's used in update which depends on records.")
+  forms <- names(data_list)[
+    which(
+      names(data_list) %>%
+        sapply(function(form){
+          nrow(data_list[[form]])>0
+        })
+    )]
+  for(TABLE in forms){
+    data_list[[TABLE]] <- data_list[[TABLE]][which(!data_list[[TABLE]][[id_col]]%in%records),]
+  }
+  if(!silent)message("Removed: ",paste0(records,collapse = ", "))
+  return(data_list)
+}
