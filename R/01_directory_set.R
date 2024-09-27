@@ -5,14 +5,12 @@ validate_dir <- function(dir_path,silent=T){
   dir_path <- clean_dir_path(dir_path)
   if ( ! file.exists(dir_path)) stop("dir_path does not exist")
   if ( ! is.logical(silent)) stop("silent parameter must be T/F")
-  #function
-  if( ! silent) message("directory --> '",dir_path,"'")
   stop_mes <- "Did you use `set_dir()`?"
   for(folder in dir_folders){
     if ( ! file.exists(file.path(dir_path,folder))) stop("'",dir_path,"/",folder,"' missing! ",stop_mes)
   }
   # if ( ! file.exists(file.path(dir_path,"ref_tables"))) stop("'",dir_path,"/ref_tables' missing! ",stop_mes)
-  if( ! silent) message("Directory is Valid!")
+  if( ! silent) bullet_in_console("Directory is Valid!",file=dir_path,bullet_type = "v")
   dir_path
 }
 clean_dir_path <- function(dir_path){

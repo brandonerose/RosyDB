@@ -84,9 +84,9 @@ validate_DB <- function(DB,silent = T,warn_only = F,allowed_names = names(blank_
       warning("Valid list but no data yet!",immediate. = T)
     }
     if(outcome_valid){
-      message("`DB` validated!")
+      bullet_in_console("`DB` validated!",bullet_type = "v")
     }
-    message("DB Loaded!")
+    bullet_in_console(DB$short_name %>% paste0(" loaded from: "),file = DB$dir_path,bullet_type = "v")
   }
   DB
 }
