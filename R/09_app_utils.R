@@ -4,7 +4,7 @@
 #' @inheritParams save_DB
 #' @export
 sidebar_choices <- function(DB,n_threshold=1){
-  codebook <- DB$summary$codebook
+  codebook <- DB$metadata$choices
   codebook <- codebook[which(codebook$n>=n_threshold),]
   sbc <- data.frame(
     form_name = codebook$form_name,

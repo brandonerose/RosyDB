@@ -66,7 +66,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   #metadata/codebook =============
   codebook <- fields_to_choices(DB$summary$metadata) %>% annotate_choices(metadata =DB$summary$metadata,data_choice = data_choice,DB = DB)
   if(drop_blanks) codebook <- codebook[which(codebook$n>0),]
-  DB$summary$codebook <- codebook
+  DB$metadata$choices <- codebook
   #cross_codebook ------
   DB$data <- original_data
   return(DB)

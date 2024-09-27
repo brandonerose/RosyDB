@@ -119,7 +119,7 @@ annotate_choices <- function(codebook,metadata,data_choice="data",DB){
   return(codebook)
 }
 # generate_cross_codebook <- function(){
-#   codebook <- DB$summary$codebook
+#   codebook <- DB$metadata$choices
 #   metadata <- get_default_fields(DB)
 #   data_choice<-get_default_data_choice(DB)
 #

@@ -18,6 +18,26 @@ default_instrument_remap <- function(instruments_remap,merge_form_name = "merged
   }
   return(instruments_remap)
 }
+#' @title default_transformation
+#' @export
+default_transformation <- function(DB){
+  transformation_template <- DB$metadata$forms
+  transformation_template <- transformation_template[order(transformation_template$repeating),]
+  merge_form_name <- DB$internals$merge_form_name
+  transformation_template$instrument_name_remap <- transformation_template$instrument_name
+  transformation_template$instrument_label_remap <- transformation_template$instrument_label
+  transformation_template$instrument_name_remap[which(!transformation_template$repeating)] <- merge_form_name
+  merge_form_name_label <- merge_form_name
+  if(merge_form_name %in% transformation_template$instrument_name){
+    merge_form_name_label <- transformation_template$instrument_label[which(transformation_template$instrument_name==merge_form_name)]
+  }
+  transformation_template$instrument_label_remap[which(!transformation_template$repeating)] <- merge_form_name_label
+  transformation_template$merge_to <- merge_form_name
+  transformation_template$by.y <- transformation_template$by.x <- DB$metadata$form_key_cols[[merge_form_name]]
+  transformation_template$x_first <- F
+  transformation_template$x_first[which(transformation_template$repeating)] <- T
+  return(transformation_template)
+}
 #' @title remap_named_df_list
 #' @export
 remap_named_df_list <- function(named_df_list,instruments_remap,merge_form_name = "merged",merge_list = NULL){
@@ -108,22 +128,4 @@ purify_names_df_list <- function(named_df_list,instruments_remap,metadata,merge_
     named_df_list[[TABLE]] <- DF
   }
   return(named_df_list)
-}
-#' @title remove_records_from_list
-#' @export
-remove_records_from_list <- function(data_list,records,id_col,silent=F){
-  if(!is_df_list(data_list))stop("data_list is not a list of data.frames as expected.")
-  if(length(records)==0)stop("no records supplied to remove_records_from_list, but it's used in update which depends on records.")
-  forms <- names(data_list)[
-    which(
-      names(data_list) %>%
-        sapply(function(form){
-          nrow(data_list[[form]])>0
-        })
-    )]
-  for(TABLE in forms){
-    data_list[[TABLE]] <- data_list[[TABLE]][which(!data_list[[TABLE]][[id_col]]%in%records),]
-  }
-  if(!silent)message("Removed: ",paste0(records,collapse = ", "))
-  return(data_list)
 }
