@@ -38,9 +38,8 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       data_extract_labelled = NULL,
       data_extract_merged = NULL,
       merge_form_name = "merged",
-      reference_state = "data",
-      reference_metadata = "redcap",
-      was_remapped = F,
+      DB_type = "default",
+      is_transformed = F,
       use_csv = F
     ),
     links = list(

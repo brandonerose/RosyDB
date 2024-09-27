@@ -123,7 +123,7 @@ save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"outp
 stack_vars <- function(DB,vars,new_name,drop_na=T){
   DB <- validate_RosyREDCap(DB)
   metadata <- DB$metadata$fields
-  if(DB$internals$was_remapped){
+  if(DB$internals$is_transformed){
     metadata <- DB$remap$metadata_remap
   }
   if(!all(vars%in%metadata$field_name))stop("all vars must be in metadata.")
@@ -139,11 +139,11 @@ stack_vars <- function(DB,vars,new_name,drop_na=T){
   return(the_stack)
 }
 get_default_fields <- function(DB){
-  if(DB$internals$was_remapped)return(DB$metadata$fields$field_name)
+  if(DB$internals$is_transformed)return(DB$metadata$fields$field_name)
   return(DB$metadata$fields$field_name)
 }
 get_default_forms <- function(DB){
-  if(DB$internals$was_remapped)return(DB$metadata$forms$instrument_name)
+  if(DB$internals$is_transformed)return(DB$metadata$forms$instrument_name)
   return(DB$metadata$forms_remap$instrument_name)
 }
 #' @export
