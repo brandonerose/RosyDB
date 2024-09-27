@@ -38,6 +38,36 @@ default_transformation <- function(DB){
   transformation_template$x_first[which(transformation_template$repeating)] <- T
   return(transformation_template)
 }
+#' @title add_transformation_to_DB
+#' @export
+add_transformation_to_DB <- function(DB,tranformation_df,ask=T){
+  tranformation_df_cols <-c(
+    "instrument_name",
+    "instrument_label",
+    "repeating",
+    "instrument_name_remap",
+    "instrument_label_remap",
+    "merge_to",
+    "by.x",
+    "by.y",
+    "x_first"
+  )
+  if(any(!names(tranformation_df)%in%tranformation_df_cols)){
+    bullet_in_console("Use `default_transformation(DB)` is an example!")
+    stop("tranformation_df needs the following colnames... ", tranformation_df_cols %>% as_comma_string())
+  }
+  choice <- T
+  if(!is.null(DB$transformation)){
+    if(!identical(DB$transformation,tranformation_df)){
+      if(ask){
+        choice <- utils::askYesNo("Do you want to add transformation? (it doesn't match previous transform)")
+      }
+    }
+  }
+  #add more checks
+  DB$transformation <- tranformation_df
+  return(DB)
+}
 #' @title remap_named_df_list
 #' @export
 remap_named_df_list <- function(named_df_list,instruments_remap,merge_form_name = "merged",merge_list = NULL){
