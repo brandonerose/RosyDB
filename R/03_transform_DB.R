@@ -111,16 +111,13 @@ transform_DB <- function(DB){
       # new_name <- by.x %>% vec1_not_in_vec2(by.y)
       del_names <- mer_names %>% vec1_in_vec2(ref_names) %>% vec1_not_in_vec2(by.y)
       mer[,del_names] <- NULL
-      all.x <- T
-      if(is_something(z$all.x)){
-        all.x <- z$all.x
-      }
       a<- merge(
         x = ref,
         y = mer,
         by.x = by.x,
         by.y = by.y,
-        all.x = all.x
+        all.x = T,
+        sort = F
       )
       all_names <- c(ref_names,names(mer)) %>% unique()
       if(is_something(z$x_first)){
