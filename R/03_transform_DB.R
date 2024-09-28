@@ -70,6 +70,7 @@ transform_DB <- function(DB){
     a<- transformation[i,]
     z<-as.list(a)
     ref <- named_df_list[[TABLE]]
+    rownames(ref)<- NULL
     by.x <- z$by.x <- z$by.x %>% strsplit("\\+") %>% unlist()
     by.y <- z$by.y <- z$by.y %>% strsplit("\\+") %>% unlist()
     if(length(z$by.x) != length(z$by.y) )stop("by.x and by.y must be same length... [",z$instrument_name,"] (",z$by.x %>% as_comma_string(),") AND (",z$by.y %>% as_comma_string(),")")
@@ -128,6 +129,7 @@ transform_DB <- function(DB){
         }
       }
       a<- a[,match(all_names,names(a))]
+      rownames(a)<- NULL
       OUT[[z$instrument_name_remap]] <- a
     }
   }
