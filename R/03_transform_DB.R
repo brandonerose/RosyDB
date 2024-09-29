@@ -40,7 +40,7 @@ add_forms_transformation_to_DB <- function(DB,forms_tranformation,ask=T){
   }
   choice <- T
   if(!is.null(DB$transformation)){
-    if(!identical(DB$transformation,forms_tranformation)){
+    if(!identical(DB$transformation$forms,forms_tranformation)){
       if(ask){
         choice <- utils::askYesNo("Do you want to add transformation? (it doesn't match previous transform)")
       }
