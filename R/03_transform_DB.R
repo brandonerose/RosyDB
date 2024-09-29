@@ -154,7 +154,7 @@ untransform_DB <- function(DB){
   }
   named_df_list <- DB$data
   forms_transformation <- DB$transformation$forms
-  original_form_names <- DB$metadata$forms$instrument_name
+  original_form_names <- DB$transformation$original_forms$instrument_name
   original_fields <- DB$metadata$fields
   keys <- DB$metadata$form_key_cols
   OUT <- NULL
