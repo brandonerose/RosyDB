@@ -150,3 +150,37 @@ get_default_forms <- function(DB){
 get_all_field_names <- function(DB){
   return(DB$data %>% sapply(colnames) %>% unlist() %>% unique())
 }
+#' @title field_names_to_form_names
+#' @export
+field_names_to_form_names <- function(DB,field_names,only_unique = T){
+  form_names <- DB$metadata$fields$form_name[match(field_names, DB$metadata$fields$field_name)]
+  if(only_unique)form_names <- unique(form_names)
+  return(form_names)
+}
+#' @title form_names_to_field_names
+#' @export
+form_names_to_field_names <- function(form_names,DB){
+  field_names <- NULL
+  for(form_name in form_names){
+    field_names <- field_names %>% append(DB$metadata$fields$field_name[which(DB$metadata$fields$form_name==instrument)])
+  }
+  return(unique(field_names))
+}
+construct_header_list <- function(df_list,md_elements = c("form_name","field_type","field_label"),fields){
+  if(anyDuplicated(fields$field_name)>0)stop("dup names not allowed in fields")
+  df_col_list <- df_list %>% lapply(colnames)
+  header_df_list <- df_col_list %>% lapply(function(field_names){
+    x<- field_names%>% lapply(function(field_name){
+      row <- which(fields$field_name==field_name)
+      if(length(row)>0){
+        return(as.character(fields[md_elements][row,]))
+      }else{
+        return(rep("",length(md_elements)))
+      }
+    }) %>% as.data.frame()
+    colnames(x)<-field_names
+    x<- x[which(apply(x, 1, function(row){any(row!="")})),]
+    x
+  })
+  return(header_df_list)
+}
