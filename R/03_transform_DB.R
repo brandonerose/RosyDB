@@ -47,7 +47,7 @@ add_forms_transformation_to_DB <- function(DB,forms_tranformation,ask=T){
     }
   }
   #add more checks
-  DB$metadata$forms <- DB$transformation$forms <- forms_tranformation
+  DB$transformation$forms <- forms_tranformation
   return(DB)
 }
 #' @title remap_named_df_list
@@ -136,6 +136,12 @@ transform_DB <- function(DB){
   if(any(!names(OUT)%in%unique(transformation$instrument_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
   DB$internals$is_transformed <- T
+  DB$transformation$original_forms <- DB$metadata$forms
+  transformation2 <- transformation
+  transformation2$instrument_name <- transformation2$instrument_name_remap
+  transformation2$instrument_label <- transformation2$instrument_label_remap
+  transformation2 <- transformation2[,c("instrument_name","instrument_label","repeating")] %>% unique()
+  DB$metadata$forms <- transformation2
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   return(DB)
 }
@@ -163,6 +169,7 @@ untransform_DB <- function(DB){
   }
   DB$data <- OUT
   DB$internals$is_transformed <- F
+  DB$metadata$forms <- DB$transformation$original_forms
   bullet_in_console(paste0(DB$short_name," untransformed according to `DB$transformation`"),bullet_type = "v")
   return(DB)
 }
