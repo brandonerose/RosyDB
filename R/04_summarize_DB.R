@@ -162,7 +162,7 @@ field_names_to_form_names <- function(DB,field_names,only_unique = T){
 form_names_to_field_names <- function(form_names,DB){
   field_names <- NULL
   for(form_name in form_names){
-    field_names <- field_names %>% append(DB$metadata$fields$field_name[which(DB$metadata$fields$form_name==instrument)])
+    field_names <- field_names %>% append(DB$metadata$fields$field_name[which(DB$metadata$fields$form_name==form_name)])
   }
   return(unique(field_names))
 }
