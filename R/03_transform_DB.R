@@ -270,7 +270,6 @@ add_edit_fields <- function(
     if(is.na(select_choices_or_calculations))select_choices_or_calculations <- original_fields_row$select_choices_or_calculations
     if(is.na(field_note))field_note <- original_fields_row$field_note
     if(identifier=="")identifier <- original_fields_row$identifier
-    if(is.na(units))units <- original_fields_row$units
   }
   field_row <- data.frame(
     field_name = field_name,
