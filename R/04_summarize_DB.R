@@ -56,7 +56,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   DB$summary$instruments_n <- 0
   if(is.data.frame(DB$summary$instruments)){ # can add expected later
     DB$summary$instruments_n <- DB$summary$instruments %>% nrow()
-    DB$summary$instruments <- DB  %>% annotate_forms(DB$summary$instruments)
+    # DB$summary$instruments <- DB  %>% annotate_forms(DB$summary$instruments)
   }
   #fields belong to instruments/forms 1 to 1 ----------------
   DB$summary$metadata_n <- 0

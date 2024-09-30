@@ -181,7 +181,7 @@ annotate_choices <- function(codebook,metadata,data_choice="data",DB){
 #' @return DB object cleaned for table or plots
 #' @export
 clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
-  metadata <-  DB %>% annotate_fields(metadata = DB$metadata$fields, skim = F)
+  # DB <-  DB %>% annotate_fields(skim = F)
   for(FORM in names(DB$data)){
     DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(metadata=metadata,drop_blanks= drop_blanks,drop_unknowns=drop_unknowns)
   }
