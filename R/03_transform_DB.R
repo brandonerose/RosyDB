@@ -191,7 +191,7 @@ insert_new_fields_to_metadata <- function(DB){
     fields <- dplyr::bind_rows(top,field_row) %>% dplyr::bind_rows(bottom)
   }
   fields_original <-
-  DB$metadata$fields <- fields
+    DB$metadata$fields <- fields
   bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
   return(DB)
 }
@@ -257,6 +257,21 @@ add_edit_fields <- function(
 ) {
   DB <-validate_DB(DB)
   # if(!DB$data_transform %>% is_something())stop("Must have transformed data to add new vars.")
+  fields <- DB$metadata$fields
+  if(DB$internals$is_transformed){
+    fields <- DB$transformation$original_fields
+  }
+  in_original_redcap <- field_name %in% fields$field_name
+  if(in_original_redcap){
+    original_fields_row <- fields[which(fields$field_name==field_name),]
+    if(missing(form_name))form_name <- original_fields_row$form_name
+    if(missing(field_type))field_type <- original_fields_row$field_type
+    if(is.na(field_label))field_label <- original_fields_row$field_label
+    if(is.na(select_choices_or_calculations))select_choices_or_calculations <- original_fields_row$select_choices_or_calculations
+    if(is.na(field_note))field_note <- original_fields_row$field_note
+    if(identifier=="")identifier <- original_fields_row$identifier
+    if(is.na(units))units <- original_fields_row$units
+  }
   field_row <- data.frame(
     field_name = field_name,
     form_name = form_name,
@@ -267,7 +282,7 @@ add_edit_fields <- function(
     identifier = identifier,
     field_type_R = field_type_R,
     units = units,
-    in_original_redcap = field_name%in%DB$metadata$fields$field_name,
+    in_original_redcap = in_original_redcap,
     field_label_short = field_label
   )
   if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
