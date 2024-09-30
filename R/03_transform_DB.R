@@ -171,24 +171,31 @@ insert_new_fields_to_metadata <- function(DB){
     field_row <- DB$transformation$fields[[field_name]]$field_row
     form_name <- field_row$form_name
     # if(any(fields$field_name==field_name))stop("field_name already included")
-    fields <- fields[which(fields$field_name!=field_name),]
-    i<-which(fields$form_name == form_name&fields$field_name == paste0(form_name,"_complete"))
-    if(length(i)>0){
-      if(i[[1]]>1){
-        i <- i-1
+    current_row <- which(fields$field_name==field_name)
+    if(length(current_row)>0){
+      fields <- fields[-current_row,]
+      i <- current_row
+      if(i>1)i <- i - 1
+    }else{
+      i<-which(fields$form_name == form_name&fields$field_name == paste0(form_name,"_complete"))
+      if(length(i)>0){
+        if(i[[1]]>1){
+          i <- i-1
+        }
       }
+      if(length(i)==0){
+        i<-which(fields$form_name == form_name)
+      }
+      if(length(i)>1){
+        i <- i[[1]]
+      }
+      if(length(i)==0)i <- nrow(fields)
     }
-    if(length(i)==0){
-      i<-which(fields$form_name == form_name)
-    }
-    if(length(i)>1){
-      i <- i[[1]]
-    }
-    if(length(i)==0)i <- nrow(fields$field_name)
     if(length(i)==0)stop("insert_after error")
     top <- fields[1:i,]
-    bottom <- fields[(i+1):nrow(fields),]
-    fields <- dplyr::bind_rows(top,field_row) %>% dplyr::bind_rows(bottom)
+    bottom <- NULL
+    if(i < nrow(fields))bottom <- fields[(i+1):nrow(fields),]
+    fields <- top %>% dplyr::bind_rows(field_row) %>% dplyr::bind_rows(bottom)
   }
   fields_original <-
     DB$metadata$fields <- fields
