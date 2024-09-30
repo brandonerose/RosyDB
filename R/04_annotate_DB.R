@@ -1,41 +1,5 @@
 #' @import RosyUtils
-#' @import RosyDB
 #' @import RosyApp
-#' @title annotate_fields
-#' @export
-annotate_fields <- function(DB,skim= T){
-  DB$metadata$fields$field_label[which(is.na(DB$metadata$fields$field_label))] <- metadata$field_name[which(is.na(DB$metadata$fields$field_label))]
-  metadata  <- unique(metadata$form_name) %>%
-    lapply(function(IN){
-      metadata[which(metadata$form_name==IN),]
-    }) %>% dplyr::bind_rows()
-  if(!"field_type_R"%in%colnames(metadata))metadata$field_type_R <- NA
-  metadata$field_type_R[which(metadata$field_type %in% c("radio","yesno","dropdown"))] <- "factor"
-  metadata$field_type_R[which(metadata$text_validation_type_or_show_slider_number == "integer")] <- "integer"
-  metadata$field_type_R[which(metadata$text_validation_type_or_show_slider_number == "date_mdy")] <- "date"
-  metadata$field_type_R[which(metadata$text_validation_type_or_show_slider_number == "date_ymd")] <- "date"
-  metadata$field_type_R[which(metadata$text_validation_type_or_show_slider_number == "datetime_dmy")] <- "datetime"
-  metadata$in_original_redcap <- metadata$field_name %in% DB$metadata$fields$field_name
-  if(!"units" %in% colnames(metadata))metadata$units <- NA
-  if(!"field_label_short" %in% colnames(metadata)) metadata$field_label_short <- DB$metadata$fields$field_label
-  # if(!"field_label_short" %in% colnames(metadata))metadata$ <- DB$metadata$fields$field_label
-  if(skim){
-    skimmed <- NULL
-    for (form in unique(metadata$form_name)){
-      COLS <- metadata$field_name[which(metadata$form_name==form)]
-      CHECK_THIS <- DB$data[[form]]
-      COLS <- COLS[which(COLS %in% colnames(CHECK_THIS))]
-      skimmed <- skimmed %>% dplyr::bind_rows(CHECK_THIS[,COLS] %>% skimr::skim())
-    }
-    FOR_ORDERING <- metadata$field_name
-    metadata <- metadata %>% merge(skimmed,by.x = "field_name",by.y = "skim_variable",all = T)
-    metadata <- FOR_ORDERING %>%
-      lapply(function(IN){
-        metadata[which(metadata$field_name==IN),]
-      }) %>% dplyr::bind_rows()
-  }
-  return(metadata)
-}
 #' @title fields_to_choices
 #' @export
 fields_to_choices <- function(metadata){
@@ -55,6 +19,49 @@ fields_to_choices <- function(metadata){
   }
   rownames(codebook) <- NULL
   return(codebook)
+}
+#' @title annotate_fields
+#' @export
+annotate_fields <- function(DB,skim= T){
+  fields <- DB$metadata$fields
+  fields$field_label[which(is.na(fields$field_label))] <- fields$field_name[which(is.na(fields$field_label))]
+  fields  <- unique(fields$form_name) %>%
+    lapply(function(IN){
+      fields[which(fields$form_name==IN),]
+    }) %>% dplyr::bind_rows()
+  if(!"field_type_R"%in%colnames(fields))fields$field_type_R <- "character"
+  fields$field_type_R[which(fields$field_type %in% c("radio","yesno","dropdown","checkbox_choice"))] <- "factor"
+  fields$field_type_R[which(fields$text_validation_type_or_show_slider_number == "integer")] <- "integer"
+  fields$field_type_R[which(fields$text_validation_type_or_show_slider_number == "date_mdy")] <- "date"
+  fields$field_type_R[which(fields$text_validation_type_or_show_slider_number == "date_ymd")] <- "date"
+  fields$field_type_R[which(fields$text_validation_type_or_show_slider_number == "datetime_dmy")] <- "datetime"
+  fields$in_original_redcap <- T
+  fields$original_form_name <- fields$form_name
+  if(DB$internals$is_transformed){
+    fields$in_original_redcap <- fields$field_name %in% DB$transformation$original_fields$field_name
+    fields$original_form_name <- DB$transformation$original_fields$form_name[match(fields$field_name,DB$transformation$original_fields$field_name)]
+  }
+  if(!"units" %in% colnames(fields))fields$units <- NA
+  if(!"field_label_short" %in% colnames(fields)) fields$field_label_short <- fields$field_label
+  # if(!"field_label_short" %in% colnames(fields))fields$ <- fields$field_label
+  if(skim){
+    skimmed <- NULL
+    for (form in unique(fields$form_name)){
+      COLS <- fields$field_name[which(fields$form_name==form)]
+      CHECK_THIS <- DB$data[[form]]
+      COLS <- COLS[which(COLS %in% colnames(CHECK_THIS))]
+      skimmed <- skimmed %>% dplyr::bind_rows(CHECK_THIS[,COLS] %>% skimr::skim())
+    }
+    FOR_ORDERING <- fields$field_name
+    fields <- fields %>% merge(skimmed,by.x = "field_name",by.y = "skim_variable",all = T)
+    fields <- FOR_ORDERING %>%
+      lapply(function(IN){
+        fields[which(fields$field_name==IN),]
+      }) %>% dplyr::bind_rows()
+  }
+  DB$metadata$fields <- fields
+  bullet_in_console("Annotated `DB$metadata$fields`",bullet_type = "v")
+  return(DB)
 }
 #' @title annotate_forms
 #' @export

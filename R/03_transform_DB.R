@@ -58,16 +58,16 @@ transform_DB <- function(DB){
     return(DB)
   }
   named_df_list <- DB$data
-  transformation <- DB$transformation$forms
+  forms_transformation <- DB$transformation$forms
   DB$transformation$original_col_names <- DB$data %>% names() %>% lapply(function(l){
     DB$data[[l]] %>% colnames()
   })
   names(DB$transformation$original_col_names) <- DB$data %>% names()
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
   OUT <- NULL
-  for(i in (1:nrow(transformation))){
-    TABLE <- transformation$instrument_name[i]
-    a<- transformation[i,]
+  for(i in (1:nrow(forms_transformation))){
+    TABLE <- forms_transformation$instrument_name[i]
+    a<- forms_transformation[i,]
     z<-as.list(a)
     ref <- named_df_list[[TABLE]]
     rownames(ref)<- NULL
@@ -133,17 +133,83 @@ transform_DB <- function(DB){
       OUT[[z$instrument_name_remap]] <- a
     }
   }
-  if(any(!names(OUT)%in%unique(transformation$instrument_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
+  if(any(!names(OUT)%in%unique(forms_transformation$instrument_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
   DB$internals$is_transformed <- T
   DB$transformation$original_forms <- DB$metadata$forms
-  DB$transformation$original_fields <- DB$metadata$fields
-  transformation_edit <- transformation
+  transformation_edit <- forms_transformation
   transformation_edit$instrument_name <- transformation_edit$instrument_name_remap
   transformation_edit$instrument_label <- transformation_edit$instrument_label_remap
   transformation_edit <- transformation_edit[,c("instrument_name","instrument_label","repeating")] %>% unique()
   DB$metadata$forms <- transformation_edit
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
+  #fields------------
+  fields <- DB$transformation$original_fields <- DB$metadata$fields
+  fields$form_name <- forms_transformation$instrument_name_remap[match(fields$form_name,forms_transformation$instrument_name)]
+  fields <- fields[order(match(fields$form_name,transformation_edit$instrument_name)),]
+  DB$metadata$fields <- fields
+  DB <- insert_new_fields_to_metadata(DB)
+  DB <- run_transformation_fields(DB)
+  DB$internals$last_data_transformation <- Sys.time()
+  return(DB)
+}
+get_transformed_fields_metadata <- function(DB){
+  transformed_fields <- NULL
+  for(field_name in names(DB$transformation$fields)){
+    transformed_fields <- dplyr::bind_rows(transformed_fields,DB$transformation$fields[[field_name]]$field_row)
+  }
+  return(transformed_fields)
+}
+insert_new_fields_to_metadata <- function(DB){
+  the_names <- names(DB$transformation$fields)
+  if(is.null(the_names)){
+    bullet_in_console("Nothing to add. Use `add_edit_fields()`",bullet_type = "x")
+    return(DB)
+  }
+  fields <- DB$metadata$fields
+  for(field_name in the_names){
+    field_row <- DB$transformation$fields[[field_name]]$field_row
+    form_name <- field_row$form_name
+    # if(any(fields$field_name==field_name))stop("field_name already included")
+    fields <- fields[which(fields$field_name!=field_name),]
+    i<-which(fields$form_name == form_name&fields$field_name == paste0(form_name,"_complete"))
+    if(length(i)>0){
+      if(i[[1]]>1){
+        i <- i-1
+      }
+    }
+    if(length(i)==0){
+      i<-which(fields$form_name == form_name)
+    }
+    if(length(i)>1){
+      i <- i[[1]]
+    }
+    if(length(i)==0)i <- nrow(fields$field_name)
+    if(length(i)==0)stop("insert_after error")
+    top <- fields[1:i,]
+    bottom <- fields[(i+1):nrow(fields),]
+    fields <- dplyr::bind_rows(top,field_row) %>% dplyr::bind_rows(bottom)
+  }
+  fields_original <-
+  DB$metadata$fields <- fields
+  bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
+  return(DB)
+}
+run_transformation_fields <- function(DB){
+  the_names <- names(DB$transformation$fields)
+  if(is.null(the_names)){
+    bullet_in_console("Nothing to run. Use `add_edit_fields()`",bullet_type = "x")
+    return(DB)
+  }
+  for(field_name in the_names){
+    OUT <- NA
+    form_name <- DB$transformation$fields[[field_name]]$field_row$form_name
+    if(!is.null(DB$transformation$fields[[field_name]]$field_func)){
+      OUT <- DB$transformation$fields[[field_name]]$field_func(data_list = DB$data)
+    }
+    DB$data[[form_name]][[field_name]] <- OUT
+  }
+  bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$data`"),bullet_type = "v")
   return(DB)
 }
 #' @title purify_names_df_list
@@ -187,7 +253,6 @@ add_edit_fields <- function(
     field_note = NA,
     identifier = "",
     units = NA,
-    insert_after,
     data_func = NULL
 ) {
   DB <-validate_DB(DB)
@@ -205,28 +270,6 @@ add_edit_fields <- function(
     in_original_redcap = field_name%in%DB$metadata$fields$field_name,
     field_label_short = field_label
   )
-  # if(any(DB$metadata$fields$field_name==field_name))stop("field_name already included")
-  if(missing(insert_after)){
-    i<-which(DB$metadata$fields$form_name == form_name&DB$metadata$fields$field_name == paste0(form_name,"_complete"))
-    if(length(i)>0){
-      if(i[[1]]>1){
-        i <- i-1
-      }
-    }
-    if(length(i)==0){
-      i<-which(DB$metadata$fields$form_name == form_name)
-    }
-    if(length(i)>1){
-      i <- i[[1]]
-    }
-    if(length(i)==0)i <- nrow(DB$metadata$fields$field_name)
-  }else{
-    i<-which(DB$metadata$fields$field_name == insert_after)
-  }
-  if(length(i)==0)stop("insert_after error")
-  top <- DB$metadata$fields[1:i,]
-  bottom <- DB$metadata$fields[(i+1):nrow(DB$metadata$fields),]
-  # DB$metadata$fields <- dplyr::bind_rows(top,field_row) %>% dplyr::bind_rows(bottom)
   if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
   DB$transformation$fields[[field_name]]<-list()
   DB$transformation$fields[[field_name]]$field_row <- field_row

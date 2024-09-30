@@ -62,7 +62,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   DB$summary$metadata_n <- 0
   DB$summary$metadata_n <- DB$metadata$fields[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive")),] %>% nrow()
   # DB$metadata$fields$field_type[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive"))] %>% table()
-  DB$summary$metadata <- DB %>%  annotate_metadata(metadata = DB$summary$metadata, data_choice = data_choice)
+  DB$summary$metadata <- DB %>%  annotate_redcap_metadata(metadata = DB$summary$metadata, data_choice = data_choice)
   #metadata/codebook =============
   codebook <- fields_to_choices(DB$summary$metadata) %>% annotate_choices(metadata =DB$summary$metadata,data_choice = data_choice,DB = DB)
   if(drop_blanks) codebook <- codebook[which(codebook$n>0),]

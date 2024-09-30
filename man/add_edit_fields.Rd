@@ -15,7 +15,6 @@ add_edit_fields(
   field_note = NA,
   identifier = "",
   units = NA,
-  insert_after,
   data_func = NULL
 )
 }
