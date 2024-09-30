@@ -183,13 +183,13 @@ annotate_choices <- function(codebook,metadata,data_choice="data",DB){
 clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
   # DB <-  DB %>% annotate_fields(skim = F)
   for(FORM in names(DB$data)){
-    DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(metadata=metadata,drop_blanks= drop_blanks,drop_unknowns=drop_unknowns)
+    DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(fields=DB$metadata$fields,drop_blanks= drop_blanks,drop_unknowns=drop_unknowns)
   }
   return(DB)
 }
 #' @title clean_DF
 #' @export
-clean_DF <- function(DF,drop_blanks = T,drop_unknowns = T){
+clean_DF <- function(DF,fields,drop_blanks = T,drop_unknowns = T){
   for(COLUMN in colnames(DF)){
     if(COLUMN %in% metadata$field_name){
       ROW <- which(metadata$field_name==COLUMN)
