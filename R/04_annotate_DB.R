@@ -23,8 +23,7 @@ fields_to_choices <- function(metadata){
 #' @title annotate_fields
 #' @export
 annotate_fields <- function(DB,skim= T){
-  fields <- DB$metadata$fields
-  colnames(get_original_fields(DB)) %>% vec_to_cvec()
+  fields <- DB$metadata$fields[,colnames(get_original_fields(DB))]
   fields$field_label[which(is.na(fields$field_label))] <- fields$field_name[which(is.na(fields$field_label))]
   fields  <- unique(fields$form_name) %>%
     lapply(function(IN){
@@ -127,7 +126,7 @@ annotate_choices <- function(DB){
   }) %>% unlist()
   choices$perc <-  (choices$n/choices$n_total) %>% round(4)
   choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
-  return(choices)
+  return(DB)
 }
 #' @title fields_with_no_data
 #' @export
