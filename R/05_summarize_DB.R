@@ -181,7 +181,7 @@ construct_header_list <- function(df_list,md_elements = c("form_name","field_typ
   return(header_df_list)
 }
 stripped_DB <- function (DB) {
-  DB$redcap <- list()
+  DB$redcap$log <- list()
   DB$data <- list()
   DB$data_update <- list()
   return(DB)

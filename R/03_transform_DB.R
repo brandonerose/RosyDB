@@ -67,7 +67,6 @@ transform_DB <- function(DB,ask = T){
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
   OUT <- NULL
   for(i in (1:nrow(forms_transformation))){
-
     TABLE <- forms_transformation$instrument_name[i]
     ref <- named_df_list[[TABLE]]
     if(!is.null(ref)){
