@@ -67,75 +67,79 @@ transform_DB <- function(DB,ask = T){
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
   OUT <- NULL
   for(i in (1:nrow(forms_transformation))){
+
     TABLE <- forms_transformation$instrument_name[i]
-    a<- forms_transformation[i,]
-    z<-as.list(a)
     ref <- named_df_list[[TABLE]]
-    rownames(ref)<- NULL
-    by.x <- z$by.x <- z$by.x %>% strsplit("\\+") %>% unlist()
-    by.y <- z$by.y <- z$by.y %>% strsplit("\\+") %>% unlist()
-    if(length(z$by.x) != length(z$by.y) )stop("by.x and by.y must be same length... [",z$instrument_name,"] (",z$by.x %>% as_comma_string(),") AND (",z$by.y %>% as_comma_string(),")")
-    if(TABLE == z$merge_to){
-      OUT[[z$instrument_name_remap]] <- ref
-    }else{
-      mer <- named_df_list[[z$merge_to]]
-      if(z$merge_to %in% names(OUT)){
-        mer <- OUT[[z$merge_to]]
-      }
-      ref_names<-names(ref)
-      mer_names<-names(mer)
-      # new_name <- by.x %>% vec1_not_in_vec2(by.y)
-      new_names <- ref_names %>% vec1_in_vec2(mer_names) %>% vec1_not_in_vec2(by.x)
-      for(new_name in new_names){
-        COL <- which(colnames(mer)==new_name)
-        replace_name <- paste0(new_name,"_merged")
-        a <- mer[,1:COL]
-        a[[replace_name]] <- a[[COL]]
-        b <- mer[,(COL+1):ncol(mer)]
-        mer <- cbind(a,b)
-      }
-      bad_cols <- which(!by.x%in%by.y)
-      z$by.x[bad_cols]
-      z$by.y[bad_cols]
-      if(length(bad_cols)>0){
-        for(col in bad_cols){
-          new_col_name <- paste0(z$by.y[col],"_merged")
-          ref[[new_col_name]] <- ref[[z$by.x[col]]]
-          z$by.x[col] <- new_col_name
-        }
-      }
-      by.x <- z$by.x
-      by.y <- z$by.y
-      ref_names<-names(ref) %>% vec1_not_in_vec2(
-        by.x %>% vec1_not_in_vec2(by.y)
-      )
-      mer_names<-names(mer)
-      # new_name <- by.x %>% vec1_not_in_vec2(by.y)
-      del_names <- mer_names %>% vec1_in_vec2(ref_names) %>% vec1_not_in_vec2(by.y)
-      mer[,del_names] <- NULL
-      ref$sort_me_ftlog <- 1:nrow(ref)
-      if(is.null(mer)){
-        a <- ref
+    if(!is.null(ref)){
+      a<- forms_transformation[i,]
+      z<-as.list(a)
+      ref <- named_df_list[[TABLE]]
+      rownames(ref)<- NULL
+      by.x <- z$by.x <- z$by.x %>% strsplit("\\+") %>% unlist()
+      by.y <- z$by.y <- z$by.y %>% strsplit("\\+") %>% unlist()
+      if(length(z$by.x) != length(z$by.y) )stop("by.x and by.y must be same length... [",z$instrument_name,"] (",z$by.x %>% as_comma_string(),") AND (",z$by.y %>% as_comma_string(),")")
+      if(TABLE == z$merge_to){
+        OUT[[z$instrument_name_remap]] <- ref
       }else{
-        a<- merge(
-          x = ref,
-          y = mer,
-          by.x = by.x,
-          by.y = by.y,
-          all.x = T,
-          sort = F
-        )
-      }
-      a <- a[order(a$sort_me_ftlog),]
-      all_names <- c(ref_names,names(mer)) %>% unique()
-      if(is_something(z$x_first)){
-        if(!z$x_first){
-          all_names <- c(by.y %>% vec1_in_vec2(by.x),names(mer) %>% vec1_not_in_vec2(by.y),ref_names) %>% unique()
+        mer <- named_df_list[[z$merge_to]]
+        if(z$merge_to %in% names(OUT)){
+          mer <- OUT[[z$merge_to]]
         }
+        ref_names<-names(ref)
+        mer_names<-names(mer)
+        # new_name <- by.x %>% vec1_not_in_vec2(by.y)
+        new_names <- ref_names %>% vec1_in_vec2(mer_names) %>% vec1_not_in_vec2(by.x)
+        for(new_name in new_names){
+          COL <- which(colnames(mer)==new_name)
+          replace_name <- paste0(new_name,"_merged")
+          a <- mer[,1:COL]
+          a[[replace_name]] <- a[[COL]]
+          b <- mer[,(COL+1):ncol(mer)]
+          mer <- cbind(a,b)
+        }
+        bad_cols <- which(!by.x%in%by.y)
+        z$by.x[bad_cols]
+        z$by.y[bad_cols]
+        if(length(bad_cols)>0){
+          for(col in bad_cols){
+            new_col_name <- paste0(z$by.y[col],"_merged")
+            ref[[new_col_name]] <- ref[[z$by.x[col]]]
+            z$by.x[col] <- new_col_name
+          }
+        }
+        by.x <- z$by.x
+        by.y <- z$by.y
+        ref_names<-names(ref) %>% vec1_not_in_vec2(
+          by.x %>% vec1_not_in_vec2(by.y)
+        )
+        mer_names<-names(mer)
+        # new_name <- by.x %>% vec1_not_in_vec2(by.y)
+        del_names <- mer_names %>% vec1_in_vec2(ref_names) %>% vec1_not_in_vec2(by.y)
+        mer[,del_names] <- NULL
+        ref$sort_me_ftlog <- 1:nrow(ref)
+        if(is.null(mer)){
+          a <- ref
+        }else{
+          a<- merge(
+            x = ref,
+            y = mer,
+            by.x = by.x,
+            by.y = by.y,
+            all.x = T,
+            sort = F
+          )
+        }
+        a <- a[order(a$sort_me_ftlog),]
+        all_names <- c(ref_names,names(mer)) %>% unique()
+        if(is_something(z$x_first)){
+          if(!z$x_first){
+            all_names <- c(by.y %>% vec1_in_vec2(by.x),names(mer) %>% vec1_not_in_vec2(by.y),ref_names) %>% unique()
+          }
+        }
+        a<- a[,match(all_names,names(a))]
+        rownames(a)<- NULL
+        OUT[[z$instrument_name_remap]] <- a
       }
-      a<- a[,match(all_names,names(a))]
-      rownames(a)<- NULL
-      OUT[[z$instrument_name_remap]] <- a
     }
   }
   if(any(!names(OUT)%in%unique(forms_transformation$instrument_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
