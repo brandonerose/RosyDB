@@ -310,7 +310,7 @@ add_edit_fields <- function(
     form_name = form_name,
     field_type = field_type,
     field_label = field_label,
-    select_choices_or_calculations = ,
+    select_choices_or_calculations = select_choices_or_calculations,
     field_note = field_note,
     identifier = identifier,
     field_type_R = field_type_R,
