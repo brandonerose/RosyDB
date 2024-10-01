@@ -180,6 +180,8 @@ construct_header_list <- function(df_list,md_elements = c("form_name","field_typ
   })
   return(header_df_list)
 }
+#' @title form_names_to_field_names
+#' @export
 stripped_DB <- function (DB) {
   DB$redcap$log <- list()
   DB$data <- list()
