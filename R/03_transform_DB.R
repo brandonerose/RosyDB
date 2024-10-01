@@ -16,7 +16,7 @@ default_forms_transformation <- function(DB){
   transformation_template$instrument_label_remap[which(!transformation_template$repeating)] <- merge_form_name_label
   transformation_template$merge_to <- merge_form_name
   original_forms <- get_original_forms(DB)
-  transformation_template$by.y <- transformation_template$by.x <- original_forms$instrument_name %>% sapply(function(instrument_name){ DB$metadata$form_key_cols[[instrument_name]] %>% paste0(collapse = "+")})
+  transformation_template$by.y <- transformation_template$by.x <- transformation_template$merge_to %>% sapply(function(instrument_name){ DB$metadata$form_key_cols[[instrument_name]] %>% paste0(collapse = "+")})
   transformation_template$x_first <- F
   transformation_template$x_first[which(transformation_template$repeating)] <- T
   return(transformation_template)
