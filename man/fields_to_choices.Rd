@@ -4,7 +4,7 @@
 \alias{fields_to_choices}
 \title{fields_to_choices}
 \usage{
-fields_to_choices(metadata)
+fields_to_choices(fields)
 }
 \description{
 fields_to_choices

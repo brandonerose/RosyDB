@@ -2,23 +2,23 @@
 #' @import RosyApp
 #' @title fields_to_choices
 #' @export
-fields_to_choices <- function(metadata){
-  rows_with_choices <- which(metadata$field_type%in%c("radio","dropdown","checkbox_choice","yesno"))
-  codebook <- NULL
+fields_to_choices <- function(fields){
+  rows_with_choices <- which(fields$field_type%in%c("radio","dropdown","checkbox_choice","yesno"))
+  choices <- NULL
   if(length(rows_with_choices)>0){
-    for(field_name in metadata$field_name[rows_with_choices]){
-      choices <- metadata$select_choices_or_calculations[which(metadata$field_name==field_name)] %>% split_choices()
-      codebook <- codebook %>% dplyr::bind_rows(
+    for(field_name in fields$field_name[rows_with_choices]){
+      selections <- fields$select_choices_or_calculations[which(fields$field_name==field_name)] %>% split_choices()
+      choices <- choices %>% dplyr::bind_rows(
         data.frame(
           field_name = field_name,
-          code = choices$code,
-          name =choices$name
+          code = selections$code,
+          name =selections$name
         )
       )
     }
   }
-  rownames(codebook) <- NULL
-  return(codebook)
+  rownames(choices) <- NULL
+  return(choices)
 }
 #' @title annotate_fields
 #' @export
@@ -84,7 +84,7 @@ annotate_forms <- function(DB,instruments){
 annotate_choices <- function(DB){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
-  choices <- DB$metadata$choices
+  choices <- DB$metadata$choices[,c("field_name", "code", "name")]
   choices <- unique(fields$field_name) %>%
     lapply(function(IN){
       choices[which(choices$field_name==IN),]
@@ -126,6 +126,8 @@ annotate_choices <- function(DB){
   }) %>% unlist()
   choices$perc <-  (choices$n/choices$n_total) %>% round(4)
   choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
+  DB$metadata$choices <- choices
+  bullet_in_console("Annotated `DB$metadata$choices`",bullet_type = "v")
   return(DB)
 }
 #' @title fields_with_no_data
