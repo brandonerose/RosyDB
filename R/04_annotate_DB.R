@@ -81,17 +81,20 @@ annotate_forms <- function(DB,instruments){
 }
 #' @title annotate_choices
 #' @export
-annotate_choices <- function(codebook,metadata,data_choice="data",DB){
-  codebook <- unique(metadata$field_name) %>%
+annotate_choices <- function(DB){
+  forms <- DB$metadata$forms
+  fields <- DB$metadata$fields
+  choices <- DB$metadata$choices
+  choices <- unique(fields$field_name) %>%
     lapply(function(IN){
-      codebook[which(codebook$field_name==IN),]
+      choices[which(choices$field_name==IN),]
     }) %>% dplyr::bind_rows()
-  codebook <- codebook %>% merge(
-    metadata %>% dplyr::select(
+  choices <- choices %>% merge(
+    fields %>% dplyr::select(
       "form_name","field_name","field_label","field_type","field_type_R"),by="field_name",sort=F)
-  codebook$form_name <- 1:nrow(codebook) %>% lapply(function(i){
-    form_name <- codebook$form_name[i]
-    field_name <- codebook$field_name[i]
+  choices$form_name <- 1:nrow(choices) %>% lapply(function(i){
+    form_name <- choices$form_name[i]
+    field_name <- choices$field_name[i]
     if(!form_name %in% names(DB$data)){
       if(DB$internals$merge_form_name %in% names(DB$data)){
         if(field_name%in%colnames(DB$data$merged))return(DB$internals$merge_form_name)
@@ -102,28 +105,28 @@ annotate_choices <- function(codebook,metadata,data_choice="data",DB){
     }
     return(form_name)
   }) %>% unlist()
-  codebook$field_name_raw <- codebook$field_name
-  codebook$field_name_raw[which(codebook$field_type=="checkbox_choice")] <- codebook$field_name[which(codebook$field_type=="checkbox_choice")] %>%
+  choices$field_name_raw <- choices$field_name
+  choices$field_name_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name[which(choices$field_type=="checkbox_choice")] %>%
     strsplit("___") %>%
     sapply(function(X){X[[1]]})
-  codebook$field_label_raw <- codebook$field_label
-  codebook$field_label_raw[which(codebook$field_type=="checkbox_choice")] <- codebook$field_name_raw[which(codebook$field_type=="checkbox_choice")] %>%
+  choices$field_label_raw <- choices$field_label
+  choices$field_label_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name_raw[which(choices$field_type=="checkbox_choice")] %>%
     sapply(function(X){
-      DB$metadata$fields$field_label[which(metadata$field_name==X)] %>% unique()
+      DB$metadata$fields$field_label[which(fields$field_name==X)] %>% unique()
     })
-  codebook$n <- 1:nrow(codebook) %>% lapply(function(i){
-    DF <- DB$data[[codebook$form_name[i]]]
+  choices$n <- 1:nrow(choices) %>% lapply(function(i){
+    DF <- DB$data[[choices$form_name[i]]]
     if(nrow(DF)==0)return(0)
-    sum(DF[,codebook$field_name[i]]==codebook$name[i],na.rm = T)
+    sum(DF[,choices$field_name[i]]==choices$name[i],na.rm = T)
   }) %>% unlist()
-  codebook$n_total <- 1:nrow(codebook) %>% lapply(function(i){
-    DF <- DB$data[[codebook$form_name[i]]]
+  choices$n_total <- 1:nrow(choices) %>% lapply(function(i){
+    DF <- DB$data[[choices$form_name[i]]]
     if(nrow(DF)==0)return(0)
-    sum(!is.na(DF[,codebook$field_name[i]]),na.rm = T)
+    sum(!is.na(DF[,choices$field_name[i]]),na.rm = T)
   }) %>% unlist()
-  codebook$perc <-  (codebook$n/codebook$n_total) %>% round(4)
-  codebook$perc_text <- codebook$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
-  return(codebook)
+  choices$perc <-  (choices$n/choices$n_total) %>% round(4)
+  choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
+  return(choices)
 }
 # generate_cross_codebook <- function(){
 #   codebook <- DB$metadata$choices

@@ -4,7 +4,7 @@
 \alias{annotate_choices}
 \title{annotate_choices}
 \usage{
-annotate_choices(codebook, metadata, data_choice = "data", DB)
+annotate_choices(DB)
 }
 \description{
 annotate_choices
