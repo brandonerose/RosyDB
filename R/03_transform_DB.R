@@ -295,7 +295,7 @@ add_edit_fields <- function(
   # if(!DB$data_transform %>% is_something())stop("Must have transformed data to add new vars.")
   fields <- get_original_fields(DB)
   in_original_redcap <- field_name %in% fields$field_name
-  if(!is.na(select_choices_or_calculations))select_choices_or_calculations <- choice_vector_string(select_choices_or_calculations)
+  if(is_something(select_choices_or_calculations))select_choices_or_calculations <- choice_vector_string(select_choices_or_calculations)
   if(in_original_redcap){
     original_fields_row <- fields[which(fields$field_name==field_name),]
     if(missing(form_name))form_name <- original_fields_row$form_name
