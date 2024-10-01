@@ -52,7 +52,7 @@ add_forms_transformation_to_DB <- function(DB,forms_tranformation,ask=T){
 }
 #' @title remap_named_df_list
 #' @export
-transform_DB <- function(DB){
+transform_DB <- function(DB,ask = T){
   if(DB$internals$is_transformed){
     bullet_in_console("Already transformed... nothing to do!",bullet_type = "x")
     return(DB)
@@ -149,9 +149,16 @@ transform_DB <- function(DB){
   fields <- fields[order(match(fields$form_name,transformation_edit$instrument_name)),]
   DB$metadata$fields <- fields
   DB <- insert_new_fields_to_metadata(DB)
-  DB <- run_transformation_fields(DB)
+  DB <- run_transformation_fields(DB,ask = ask)
   DB$internals$last_data_transformation <- Sys.time()
   return(DB)
+}
+get_original_fields <- function(DB){
+  fields <- DB$metadata$fields
+  if(DB$internals$is_transformed){
+    fields <- DB$transformation$original_fields
+  }
+  return(fields)
 }
 get_transformed_fields_metadata <- function(DB){
   transformed_fields <- NULL
@@ -202,17 +209,38 @@ insert_new_fields_to_metadata <- function(DB){
   bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
   return(DB)
 }
-run_transformation_fields <- function(DB){
+run_transformation_fields <- function(DB,ask = T){
   the_names <- names(DB$transformation$fields)
   if(is.null(the_names)){
     bullet_in_console("Nothing to run. Use `add_edit_fields()`",bullet_type = "x")
     return(DB)
   }
-  for(field_name in the_names){
+  original_fields <- get_original_fields(DB)
+  the_names_existing <- the_names[which(the_names %in% original_fields$field_name)]
+  the_names_new <- the_names[which(!the_names %in% original_fields$field_name)]
+  fields_to_update <- NULL
+  for(field_name in c(the_names_existing,the_names_new)){
     OUT <- NA
     form_name <- DB$transformation$fields[[field_name]]$field_row$form_name
     if(!is.null(DB$transformation$fields[[field_name]]$field_func)){
       OUT <- DB$transformation$fields[[field_name]]$field_func(data_list = DB$data)
+    }
+    if(field_name %in% the_names_existing){
+      OLD <- DB$data[[form_name]][[field_name]]
+      if(!identical(OUT,OLD)){
+        ref_cols <- DB$metadata$form_key_cols[[form_name]]
+        new <- old <- DB$data[[form_name]][,c(ref_cols,field_name)]
+        new[[field_name]] <- OUT
+        DF <-  find_df_diff2(
+          new = new,
+          old = old,
+          ref_cols = ref_cols,
+          view_old = ask
+        )
+        if(is_something(DF)){
+          DB$data_update$transform[[field_name]] <- DF
+        }
+      }
     }
     DB$data[[form_name]][[field_name]] <- OUT
   }
@@ -264,10 +292,7 @@ add_edit_fields <- function(
 ) {
   DB <-validate_DB(DB)
   # if(!DB$data_transform %>% is_something())stop("Must have transformed data to add new vars.")
-  fields <- DB$metadata$fields
-  if(DB$internals$is_transformed){
-    fields <- DB$transformation$original_fields
-  }
+  fields <- get_original_fields(DB)
   in_original_redcap <- field_name %in% fields$field_name
   if(in_original_redcap){
     original_fields_row <- fields[which(fields$field_name==field_name),]
