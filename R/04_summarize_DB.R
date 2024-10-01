@@ -142,10 +142,6 @@ get_default_fields <- function(DB){
   if(DB$internals$is_transformed)return(DB$metadata$fields$field_name)
   return(DB$metadata$fields$field_name)
 }
-get_default_forms <- function(DB){
-  if(DB$internals$is_transformed)return(DB$metadata$forms$instrument_name)
-  return(DB$metadata$forms_remap$instrument_name)
-}
 #' @export
 get_all_field_names <- function(DB){
   return(DB$data %>% sapply(colnames) %>% unlist() %>% unique())
