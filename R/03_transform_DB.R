@@ -273,6 +273,7 @@ untransform_DB <- function(DB){
   DB$data <- OUT
   DB$internals$is_transformed <- F
   DB$metadata$forms <- DB$transformation$original_forms
+  DB$metadata$fields <- DB$transformation$original_fields
   bullet_in_console(paste0(DB$short_name," untransformed according to `DB$transformation`"),bullet_type = "v")
   return(DB)
 }
