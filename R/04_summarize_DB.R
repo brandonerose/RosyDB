@@ -180,3 +180,15 @@ construct_header_list <- function(df_list,md_elements = c("form_name","field_typ
   })
   return(header_df_list)
 }
+stripped_DB <- function (DB) {
+  DB$redcap <- list()
+  DB$data <- list()
+  DB$data_update <- list()
+  return(DB)
+}
+all_DB_to_char_cols <- function(DB){
+  DB$data <-DB$data %>% all_character_cols_list()
+  DB$data_transform <-DB$data_transform %>% all_character_cols_list()
+  DB$data_update <-DB$data_update %>% all_character_cols_list()
+  return(DB)
+}

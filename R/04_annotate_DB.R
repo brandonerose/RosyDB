@@ -24,6 +24,7 @@ fields_to_choices <- function(metadata){
 #' @export
 annotate_fields <- function(DB,skim= T){
   fields <- DB$metadata$fields
+  colnames(get_original_fields(DB)) %>% vec_to_cvec()
   fields$field_label[which(is.na(fields$field_label))] <- fields$field_name[which(is.na(fields$field_label))]
   fields  <- unique(fields$form_name) %>%
     lapply(function(IN){
@@ -127,6 +128,11 @@ annotate_choices <- function(DB){
   choices$perc <-  (choices$n/choices$n_total) %>% round(4)
   choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
   return(choices)
+}
+#' @title fields_with_no_data
+#' @export
+fields_with_no_data <- function(DB){
+  DB$metadata$fields$field_name[which(is.na(DB$metadata$fields$complete_rate)&!DB$metadata$fields$field_type%in%c("checkbox","descriptive"))]
 }
 # generate_cross_codebook <- function(){
 #   codebook <- DB$metadata$choices

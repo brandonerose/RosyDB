@@ -185,3 +185,44 @@ project_health_check <- function(update = F){
   #   save_projects_to_cache(projects,silent = F)
   # }
 }
+field_colnames <- function(){
+  c(
+    "field_name",
+    "form_name",
+    "section_header",
+    "field_type",
+    "field_label",
+    "select_choices_or_calculations",
+    "field_note",
+    "text_validation_type_or_show_slider_number",
+    "text_validation_min",
+    "text_validation_max",
+    "identifier",
+    "branching_logic",
+    "required_field",
+    "custom_alignment",
+    "question_number",
+    "matrix_group_name",
+    "matrix_ranking",
+    "field_annotation"
+  )
+}
+form_colnames <- function(type){
+  if(missing(type))type<- "default"
+  if(type =="default"){
+    c(
+      "instrument_name",
+      "instrument_label",
+      "repeating",
+      "repeating_via_events"
+    ) %>% return()
+  }
+  if(type =="redcap"){
+    c(
+      "form_name",
+      "form_label",
+      "repeating",
+      "repeating_via_events"
+    ) %>% return()
+  }
+}
