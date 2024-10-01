@@ -157,7 +157,7 @@ transform_DB <- function(DB,ask = T){
   fields <- fields[order(match(fields$form_name,transformation_edit$instrument_name)),]
   DB$metadata$fields <- fields
   DB <- insert_new_fields_to_metadata(DB)
-  DB <- run_transformation_fields(DB,ask = ask)
+  if(is_something(process_df_list(DB$data,silent = T)))DB <- run_transformation_fields(DB,ask = ask)
   DB$internals$last_data_transformation <- Sys.time()
   return(DB)
 }
