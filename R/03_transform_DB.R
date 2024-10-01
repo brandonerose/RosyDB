@@ -155,9 +155,8 @@ transform_DB <- function(DB,ask = T){
   fields <- DB$transformation$original_fields <- DB$metadata$fields
   fields$form_name <- forms_transformation$instrument_name_remap[match(fields$form_name,forms_transformation$instrument_name)]
   fields <- fields[order(match(fields$form_name,transformation_edit$instrument_name)),]
-  DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
   DB <- insert_new_fields_to_metadata(DB)
-  DB$metadata$fields <- DB$metadata$fields %>% fields_
+  DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
   if(is_something(process_df_list(DB$data,silent = T)))DB <- run_transformation_fields(DB,ask = ask)
   DB$internals$last_data_transformation <- Sys.time()
   return(DB)
