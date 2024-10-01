@@ -54,3 +54,25 @@ run_quality_checks <- function(DB){
   }
   return(DB)
 }
+#' @title split_choices
+#' @export
+split_choices <- function(x){
+  oops <- x
+  x <- gsub("\n", " | ",x)  #added this to account for redcap metadata output if not a number
+  x <- x %>% strsplit(" [:|:] ") %>% unlist()
+  check_length <- length(x)
+  # code <- x %>% stringr::str_extract("^[^,]+(?=, )")
+  # name <- x %>% stringr::str_extract("(?<=, ).*$")
+  result <- x %>% stringr::str_match("([^,]+), (.*)")
+  # x <- data.frame(
+  #   code=x %>% strsplit(", ") %>% sapply(`[`, 1),
+  #   name=x %>% strsplit(", ")%>% sapply(`[`, -1) %>% sapply(function(y){paste0(y,collapse = ", ")})
+  # )
+  x <- data.frame(
+    code=result[,2],
+    name=result[,3]
+  )
+  rownames(x) <- NULL
+  if(nrow(x)!=check_length)stop("split choice error: ",oops)
+  x
+}

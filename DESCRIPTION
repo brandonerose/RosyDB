@@ -23,6 +23,7 @@ Imports:
     rstudioapi,
     shiny,
     skimr,
+    stringr,
     table1,
     utils
 Remotes: 
