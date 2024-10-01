@@ -8,7 +8,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   #project --------
   # DB$summary$users <- DB$redcap$users
   df_names <- c("metadata","instruments","event_mapping","events","arms")
-  # if(data_choice == "data_transform"){
+  # if(data_choice == "data"){
   #   df_names <- c(df_names,paste0(df_names,"_remap"))
   #   redcap_remap <- "remap"
   # }
@@ -88,7 +88,7 @@ rmarkdown_DB <- function (DB,dir_other){
   )
 }
 #' @export
-save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"output"),file_name = paste0(DB$short_name,"_RosyREDCap"),separate = F,data_choice = "data_transform"){
+save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"output"),file_name = paste0(DB$short_name,"_RosyREDCap"),separate = F,data_choice = "data"){
   DB <- DB %>% validate_RosyREDCap()
   to_save_list <- append(DB$data,DB[["summary"]])
   to_save_list <- to_save_list[which(to_save_list %>% sapply(is.data.frame))]
@@ -190,7 +190,7 @@ stripped_DB <- function (DB) {
 }
 all_DB_to_char_cols <- function(DB){
   DB$data <-DB$data %>% all_character_cols_list()
-  DB$data_transform <-DB$data_transform %>% all_character_cols_list()
+  DB$data <-DB$data %>% all_character_cols_list()
   DB$data_update <-DB$data_update %>% all_character_cols_list()
   return(DB)
 }

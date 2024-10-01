@@ -310,7 +310,7 @@ add_edit_fields <- function(
     data_func = NULL
 ) {
   DB <-validate_DB(DB)
-  # if(!DB$data_transform %>% is_something())stop("Must have transformed data to add new vars.")
+  # if(!DB$data %>% is_something())stop("Must have transformed data to add new vars.")
   fields <- get_original_fields(DB)
   in_original_redcap <- field_name %in% fields$field_name
   if(is_something(select_choices_or_calculations))select_choices_or_calculations <- choice_vector_string(select_choices_or_calculations)

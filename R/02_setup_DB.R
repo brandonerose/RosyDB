@@ -151,7 +151,7 @@ save_DB <- function(DB){
 #' @title Shows DB in the env
 #' @inheritParams save_DB
 #' @param also_metadata logical for including metadata
-#' @param data_choice whether to use 'data' or 'data_transform'
+#' @param data_choice whether to use 'data' or 'data'
 #' @param only_dfs logical for including data.frames
 #' @return DB tables
 #' @export
