@@ -1,6 +1,6 @@
 Package: RosyDB
 Title: Rosy Database
-Version: 0.0.0.9001
+Version: 0.0.0.9002
 Authors@R: 
     person("Brandon", "Rose", , "thecodingdocs@gmail.com", role = c("cre", "aut"))
 Description: Create a relational database as an R list.
