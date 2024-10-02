@@ -256,7 +256,7 @@ run_transformation_fields <- function(DB,ask = T){
           message_pass = paste0(form_name," - ",field_name,": ")
         )
         if(is_something(DF)){
-          DB$data_update$from_transform[[field_name]] <- DF
+          DB$transformation$data_updates[[field_name]] <- DF
         }
       }
     }
