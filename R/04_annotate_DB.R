@@ -94,7 +94,6 @@ annotate_choices <- function(DB){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
   choices <- DB$metadata$choices[,c("field_name", "code", "name")]
-
   # choices$field_name_raw <- choices$field_name
   # choices$field_name_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name[which(choices$field_type=="checkbox_choice")] %>%
   #   strsplit("___") %>%

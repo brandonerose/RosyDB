@@ -2,10 +2,10 @@
 % Please edit documentation in R/03_transform_DB.R
 \name{untransform_DB}
 \alias{untransform_DB}
-\title{purify_names_df_list}
+\title{untransform_DB}
 \usage{
 untransform_DB(DB)
 }
 \description{
-purify_names_df_list
+untransform_DB
 }
