@@ -72,13 +72,13 @@ drop_DB_to_dir <- function(
 }
 #' @title Reads DB from the dropped REDCap files in dir/REDCap/upload
 #' @inheritParams save_DB
-#' @param allow_all logical TF for allowing DB$data names that are not also instrument names
+#' @param allow_all logical TF for allowing DB$data names that are not also form names
 #' @param drop_nonredcap_vars logical TF for dropping non-redcap variable names
-#' @param drop_non_instrument_vars logical TF for dropping non-instrument variable names
+#' @param drop_non_form_vars logical TF for dropping non-form variable names
 #' @param stop_or_warn character string of whether to stop, warn, or do nothing when forbidden cols are present
 #' @return messages for confirmation
 #' @export
-read_DB_from_dir <- function(DB,allow_all=T,drop_non_instrument_vars=T,stop_or_warn="warn"){
+read_DB_from_dir <- function(DB,allow_all=T,drop_non_form_vars=T,stop_or_warn="warn"){
   DB <- validate_DB(DB)
   path <- file.path(get_dir(DB),DB$short_name,"upload")
   if(!file.exists(path))stop("No files found at path --> ",path)
@@ -89,7 +89,7 @@ read_DB_from_dir <- function(DB,allow_all=T,drop_non_instrument_vars=T,stop_or_w
     match = NA
   )
   df$match <- strsplit(df$file_name_no_ext,"_") %>% sapply(function(IN){IN[length(IN)]})
-  df$match[which(!df$match%in%c(DB$internals$merge_form_name,DB$redcap$instruments$instrument_name))] <- NA
+  df$match[which(!df$match%in%c(DB$internals$merge_form_name,DB$redcap$forms$form_name))] <- NA
   if(!allow_all){
     df <- df[which(!is.na(df$match)),]
   }
@@ -104,9 +104,9 @@ read_DB_from_dir <- function(DB,allow_all=T,drop_non_instrument_vars=T,stop_or_w
   #       append(x) %>%
   #       unique()
   #   }
-  #   if(drop_non_instrument_vars){
+  #   if(drop_non_form_vars){
   #     form <- df$match[i]
-  #     if(form == DB$internals$merge_form_name)form <- DB$redcap$instruments$instrument_name[which(!DB$redcap$instruments$repeating)]
+  #     if(form == DB$internals$merge_form_name)form <- DB$redcap$forms$form_name[which(!DB$redcap$forms$repeating)]
   #     x<-colnames(the_file)[which(!colnames(the_file)%in%c(DB$redcap$raw_structure_cols,DB$redcap$metadata$field_name[which(DB$redcap$metadata$form_name%in%form)]))]
   #     redcapols<-drop_cols %>%
   #       append(x) %>%

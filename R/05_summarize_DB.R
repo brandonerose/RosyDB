@@ -7,7 +7,7 @@
 summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$internals$reference_state){
   #project --------
   # DB$summary$users <- DB$redcap$users
-  df_names <- c("metadata","instruments","event_mapping","events","arms")
+  df_names <- c("metadata","forms","event_mapping","events","arms")
   # if(data_choice == "data"){
   #   df_names <- c(df_names,paste0(df_names,"_remap"))
   #   redcap_remap <- "remap"
@@ -34,7 +34,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   DB$summary$arms_n <- NA
   if(is.data.frame(DB$metadata$arms)){
     DB$summary$arms_n <- DB$metadata$arms %>% nrow()
-    id_pairs <- DB$metadata$forms$instrument_name %>%  lapply(function(IN){DB$data[[IN]][,c(DB$redcap$id_col,"arm_num")]}) %>% dplyr::bind_rows() %>% unique()
+    id_pairs <- DB$metadata$forms$form_name %>%  lapply(function(IN){DB$data[[IN]][,c(DB$redcap$id_col,"arm_num")]}) %>% dplyr::bind_rows() %>% unique()
     DB$metadata$arms$arm_records_n <- DB$metadata$arms$arm_num %>% sapply(function(arm){
       which(id_pairs$arm_num==arm)%>% length()
     })
@@ -52,13 +52,13 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
     #   DB$summary[[paste0(event,"_records_n")]] <- DB$data[[]][which(DB$metadata$arms$arm_num==arm)]
     # }
   }
-  #instruments/forms belong to events many to 1 (if no events/arms) ----------------
-  DB$summary$instruments_n <- 0
-  if(is.data.frame(DB$summary$instruments)){ # can add expected later
-    DB$summary$instruments_n <- DB$summary$instruments %>% nrow()
-    # DB$summary$instruments <- DB  %>% annotate_forms(DB$summary$instruments)
+  #forms/forms belong to events many to 1 (if no events/arms) ----------------
+  DB$summary$forms_n <- 0
+  if(is.data.frame(DB$summary$forms)){ # can add expected later
+    DB$summary$forms_n <- DB$summary$forms %>% nrow()
+    # DB$summary$forms <- DB  %>% annotate_forms(DB$summary$forms)
   }
-  #fields belong to instruments/forms 1 to 1 ----------------
+  #fields belong to forms/forms 1 to 1 ----------------
   DB$summary$metadata_n <- 0
   DB$summary$metadata_n <- DB$metadata$fields[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive")),] %>% nrow()
   # DB$metadata$fields$field_type[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive"))] %>% table()

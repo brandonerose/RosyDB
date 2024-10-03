@@ -25,9 +25,9 @@ get_transformed_forms <- function(DB){
   forms <- NULL
   if(DB$internals$is_transformed){
     forms <- DB$metadata$forms
-    forms$instrument_name <- forms$instrument_name_remap
-    forms$instrument_label <- forms$instrument_label_remap
-    forms <- forms[,which(colnames(forms)%in%c("instrument_name","instrument_label","repeating","repeating_via_events"))] %>% unique()
+    forms$form_name <- forms$form_name_remap
+    forms$form_label <- forms$form_label_remap
+    forms <- forms[,which(colnames(forms)%in%c("form_name","form_label","repeating","repeating_via_events"))] %>% unique()
   }
   return(forms)
 }
@@ -37,16 +37,16 @@ default_forms_transformation <- function(DB){
   forms_transformation <- get_original_forms(DB)
   forms_transformation <- forms_transformation[order(forms_transformation$repeating),]
   merge_form_name <- DB$internals$merge_form_name
-  forms_transformation$instrument_name_remap <- forms_transformation$instrument_name
-  forms_transformation$instrument_label_remap <- forms_transformation$instrument_label
-  forms_transformation$instrument_name_remap[which(!forms_transformation$repeating)] <- merge_form_name
+  forms_transformation$form_name_remap <- forms_transformation$form_name
+  forms_transformation$form_label_remap <- forms_transformation$form_label
+  forms_transformation$form_name_remap[which(!forms_transformation$repeating)] <- merge_form_name
   merge_form_name_label <- merge_form_name
-  if(merge_form_name %in% forms_transformation$instrument_name){
-    merge_form_name_label <- forms_transformation$instrument_label[which(forms_transformation$instrument_name==merge_form_name)]
+  if(merge_form_name %in% forms_transformation$form_name){
+    merge_form_name_label <- forms_transformation$form_label[which(forms_transformation$form_name==merge_form_name)]
   }
-  forms_transformation$instrument_label_remap[which(!forms_transformation$repeating)] <- merge_form_name_label
+  forms_transformation$form_label_remap[which(!forms_transformation$repeating)] <- merge_form_name_label
   forms_transformation$merge_to <- merge_form_name
-  forms_transformation$by.y <- forms_transformation$by.x <- forms_transformation$merge_to %>% sapply(function(instrument_name){ DB$metadata$form_key_cols[[instrument_name]] %>% paste0(collapse = "+")})
+  forms_transformation$by.y <- forms_transformation$by.x <- forms_transformation$merge_to %>% sapply(function(form_name){ DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+")})
   forms_transformation$x_first <- F
   forms_transformation$x_first[which(forms_transformation$repeating)] <- T
   return(forms_transformation)
@@ -59,10 +59,10 @@ default_fields_transformation <- function(DB){
     DB$metadata$form_key_cols[[form_name]]
   })
   forms <- get_original_forms(DB)
-  for(form_name in forms$instrument_name){
+  for(form_name in forms$form_name){
     cols <- DB$metadata$form_key_cols[[form_name]]
     if(length(cols)>1){
-      form_label <- forms$instrument_label[which(forms$form_name==form_name)]
+      form_label <- forms$form_label[which(forms$form_name==form_name)]
       DB <- DB %>% add_field_transformation(
         field_name = paste0(form_name,"_compound_key"),
         form_name = form_name,
@@ -93,11 +93,11 @@ default_fields_transformation <- function(DB){
 add_forms_transformation <- function(DB,forms_tranformation,ask=T){
   if(missing(forms_tranformation))forms_tranformation <- default_forms_transformation(DB)
   forms_tranformation_cols <-c(
-    "instrument_name",
-    "instrument_label",
+    "form_name",
+    "form_label",
     "repeating",
-    "instrument_name_remap",
-    "instrument_label_remap",
+    "form_name_remap",
+    "form_label_remap",
     "merge_to",
     "by.x",
     "by.y",
@@ -266,7 +266,7 @@ transform_DB <- function(DB,ask = T){
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
   OUT <- NULL
   for(i in (1:nrow(forms_transformation))){
-    TABLE <- forms_transformation$instrument_name[i]
+    TABLE <- forms_transformation$form_name[i]
     ref <- named_df_list[[TABLE]]
     if(!is.null(ref)){
       a<- forms_transformation[i,]
@@ -275,9 +275,9 @@ transform_DB <- function(DB,ask = T){
       rownames(ref)<- NULL
       by.x <- z$by.x <- z$by.x %>% strsplit("\\+") %>% unlist()
       by.y <- z$by.y <- z$by.y %>% strsplit("\\+") %>% unlist()
-      if(length(z$by.x) != length(z$by.y) )stop("by.x and by.y must be same length... [",z$instrument_name,"] (",z$by.x %>% as_comma_string(),") AND (",z$by.y %>% as_comma_string(),")")
+      if(length(z$by.x) != length(z$by.y) )stop("by.x and by.y must be same length... [",z$form_name,"] (",z$by.x %>% as_comma_string(),") AND (",z$by.y %>% as_comma_string(),")")
       if(TABLE == z$merge_to){
-        OUT[[z$instrument_name_remap]] <- ref
+        OUT[[z$form_name_remap]] <- ref
       }else{
         mer <- named_df_list[[z$merge_to]]
         if(z$merge_to %in% names(OUT)){
@@ -336,19 +336,19 @@ transform_DB <- function(DB,ask = T){
         }
         a<- a[,match(all_names,names(a))]
         rownames(a)<- NULL
-        OUT[[z$instrument_name_remap]] <- a
+        OUT[[z$form_name_remap]] <- a
       }
     }
   }
-  if(any(!names(OUT)%in%unique(forms_transformation$instrument_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
+  if(any(!names(OUT)%in%unique(forms_transformation$form_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
   DB$internals$is_transformed <- T
   DB$transformation$original_forms <- DB$metadata$forms
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   #fields------------
   fields <- DB$transformation$original_fields <- DB$metadata$fields
-  fields$form_name <- forms_transformation$instrument_name_remap[match(fields$form_name,forms_transformation$instrument_name)]
-  fields <- fields[order(match(fields$form_name,transformation_edit$instrument_name)),]
+  fields$form_name <- forms_transformation$form_name_remap[match(fields$form_name,forms_transformation$form_name)]
+  fields <- fields[order(match(fields$form_name,transformation_edit$form_name)),]
   DB <- combine_original_transformed_fields(DB)
   DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
   if(is_something(process_df_list(DB$data,silent = T)))DB <- run_fields_transformation(DB,ask = ask)
@@ -364,14 +364,14 @@ untransform_DB <- function(DB){
   }
   named_df_list <- DB$data
   forms_transformation <- DB$transformation$forms
-  original_form_names <- DB$transformation$original_forms$instrument_name
+  original_form_names <- DB$transformation$original_forms$form_name
   original_fields <- DB$metadata$fields
   keys <- DB$metadata$form_key_cols
   OUT <- NULL
-  if(any(!original_form_names%in%forms_transformation$instrument_name))stop("Must have all original form names in transformation!")
+  if(any(!original_form_names%in%forms_transformation$form_name))stop("Must have all original form names in transformation!")
   # TABLE <- original_form_names%>%sample1()
   for(TABLE in original_form_names){
-    DF <- named_df_list[[forms_transformation$instrument_name_remap[which(forms_transformation$instrument_name==TABLE)]]]
+    DF <- named_df_list[[forms_transformation$form_name_remap[which(forms_transformation$form_name==TABLE)]]]
     COLS <- DB$transformation$original_col_names[[TABLE]]
     if(any(!COLS%in%colnames(DF)))stop("Missing cols from orginal DF transformation... ",TABLE)
     DF <- DF[,COLS]
@@ -386,7 +386,7 @@ untransform_DB <- function(DB){
 }
 missing_form_names <- function(DB){
   form_names <- names(DB$data)
-  form_names <- form_names[which(!form_names%in% DB$metadata$forms$instrument_name)]
+  form_names <- form_names[which(!form_names%in% DB$metadata$forms$form_name)]
   return(form_names)
 }
 missing_field_names <- function(DB){

@@ -103,7 +103,7 @@ extract_project_details <- function(DB){
     # id_col = DB$redcap$id_col,
     # is_longitudinal = DB$redcap$is_longitudinal,
     # has_multiple_arms = DB$redcap$has_multiple_arms,
-    # has_repeating_instruments_or_events = DB$redcap$has_repeating_instruments_or_events,
+    # has_repeating_forms_or_events = DB$redcap$has_repeating_forms_or_events,
     # n_records = ifelse(is.null(DB$summary$all_records[[DB$redcap$id_col]]),NA,DB$summary$all_records %>% nrow()),
     # last_metadata_update = DB$internals$last_metadata_update,
     # last_data_update = DB$internals$last_data_update,
@@ -211,8 +211,8 @@ form_colnames <- function(type){
   if(missing(type))type<- "default"
   if(type =="default"){
     c(
-      "instrument_name",
-      "instrument_label",
+      "form_name",
+      "form_label",
       "repeating",
       "repeating_via_events"
     ) %>% return()

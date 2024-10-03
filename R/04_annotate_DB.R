@@ -74,19 +74,19 @@ annotate_fields <- function(DB,skim= T){
 }
 #' @title annotate_forms
 #' @export
-annotate_forms <- function(DB,instruments){
-  choice <- "instrument_name"
-  if("former_instrument_names" %in% colnames(instruments)){
-    choice <- "former_instrument_names"
+annotate_forms <- function(DB,forms){
+  choice <- "form_name"
+  if("former_form_names" %in% colnames(forms)){
+    choice <- "former_form_names"
   }
   for(status in c("Incomplete","Unverified","Complete")){
-    instruments[[tolower(status)]] <- instruments[[choice]] %>% sapply(function(former_instrument_names){
-      former_instrument_names %>% strsplit(" [:|:] ") %>% unlist() %>%  sapply(function(instrument_name){
-        (DB[[get_default_data_choice(DB)]][[instrument_name]][[paste0(instrument_name,"_complete")]]==status) %>% which() %>% length()
+    forms[[tolower(status)]] <- forms[[choice]] %>% sapply(function(former_form_names){
+      former_form_names %>% strsplit(" [:|:] ") %>% unlist() %>%  sapply(function(form_name){
+        (DB[[get_default_data_choice(DB)]][[form_name]][[paste0(form_name,"_complete")]]==status) %>% which() %>% length()
       }) %>% paste0(collapse = " | ")
     })
   }
-  return(instruments)
+  return(forms)
 }
 #' @title annotate_choices
 #' @export

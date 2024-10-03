@@ -4,7 +4,7 @@
 \alias{annotate_forms}
 \title{annotate_forms}
 \usage{
-annotate_forms(DB, instruments)
+annotate_forms(DB, forms)
 }
 \description{
 annotate_forms
