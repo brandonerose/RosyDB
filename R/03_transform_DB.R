@@ -55,6 +55,37 @@ default_forms_transformation <- function(DB){
 #' @export
 default_fields_transformation <- function(DB){
   fields_transformation <- list()
+  DB$metadata$form_key_cols %>% names() %>% lapply(function(form_name){
+    DB$metadata$form_key_cols[[form_name]]
+  })
+  forms <- get_original_forms(DB)
+  for(form_name in forms$instrument_name){
+    cols <- DB$metadata$form_key_cols[[form_name]]
+    if(length(cols)>1){
+      form_label <- forms$instrument_label[which(forms$form_name==form_name)]
+      DB <- DB %>% add_field_transformation(
+        field_name = paste0(form_name,"_compound_key"),
+        form_name = form_name,
+        field_type = "text",
+        field_type_R = "character",
+        field_label = paste(form_label,"Compound Key"),
+        data_func = function(DB,field_name){
+          form_name<- DB$transformation$fields[[field_name]]$field_row$form_name
+          cols <- DB$metadata$form_key_cols[[form_name]]
+          OUT <- NULL
+          while(length(cols)>0){
+            if(is.null(OUT)){
+              OUT <- DB$data[[form_name]][[cols[1]]]
+            }else{
+              OUT <- OUT %>% paste0("_",DB$data[[form_name]][[cols[1]]])
+            }
+            cols <- cols[-1]
+          }
+          return(OUT)
+        }
+      )
+    }
+  }
   return(fields_transformation)
 }
 #' @title add_forms_transformation
@@ -194,7 +225,7 @@ run_fields_transformation <- function(DB,ask = T){
     OUT <- NA
     form_name <- DB$transformation$fields[[field_name]]$field_row$form_name
     if(!is.null(DB$transformation$fields[[field_name]]$field_func)){
-      OUT <- DB$transformation$fields[[field_name]]$field_func(data_list = DB$data)
+      OUT <- DB$transformation$fields[[field_name]]$field_func(DB = DB, field_name = field_name)
     }
     if(field_name %in% the_names_existing){
       OLD <- DB$data[[form_name]][[field_name]]
@@ -313,10 +344,6 @@ transform_DB <- function(DB,ask = T){
   DB$data <- OUT
   DB$internals$is_transformed <- T
   DB$transformation$original_forms <- DB$metadata$forms
-
-
-
-
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   #fields------------
   fields <- DB$transformation$original_fields <- DB$metadata$fields
@@ -356,4 +383,22 @@ untransform_DB <- function(DB){
   DB$metadata$fields <- DB$transformation$original_fields
   bullet_in_console(paste0(DB$short_name," untransformed according to `DB$transformation`"),bullet_type = "v")
   return(DB)
+}
+missing_form_names <- function(DB){
+  form_names <- names(DB$data)
+  form_names <- form_names[which(!form_names%in% DB$metadata$forms$instrument_name)]
+  return(form_names)
+}
+missing_field_names <- function(DB){
+  md <- data.frame(
+    field_name = DB$metadata$fields$field_name,
+    form_name = DB$metadata$fields$form_name
+  )
+  d <- DB$data %>% names() %>% lapply(function(form_name){
+    data.frame(
+      form_name = form_name,
+      field_name = colnames(DB$data[[form_name]])
+    )
+  }) %>% dplyr::bind_rows()
+  return(form_names)
 }
