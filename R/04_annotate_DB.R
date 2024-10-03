@@ -3,20 +3,29 @@
 #' @title fields_to_choices
 #' @export
 fields_to_choices <- function(fields){
-  rows_with_choices <- which(fields$field_type%in%c("radio","dropdown","checkbox_choice","yesno"))
+  fields <- fields[which(fields$field_type%in%c("radio","dropdown","checkbox_choice","yesno")),]
+  fields$field_name[which(fields$field_type=="checkbox_choice")] <- fields$field_name[which(fields$field_type=="checkbox_choice")] %>% strsplit("___") %>% sapply(function(X){X[[1]]})
   choices <- NULL
   if(length(rows_with_choices)>0){
-    for(field_name in fields$field_name[rows_with_choices]){
-      selections <- fields$select_choices_or_calculations[which(fields$field_name==field_name)] %>% split_choices()
+    for(i in 1:nrow(fields)){
+      field_name <- fields$field_name[i]
+      form_name <- fields$form_name[i]
+      field_label <- fields$field_label[i]
+      field_type <- fields$field_type[i]
+      selections <- fields$select_choices_or_calculations[i] %>% split_choices()
       choices <- choices %>% dplyr::bind_rows(
         data.frame(
+          form_name = form_name,
           field_name = field_name,
+          field_type = field_type,
+          field_label =  ifelse(!is.na(field_label),field_label,field_name),
           code = selections$code,
           name =selections$name
         )
       )
     }
   }
+  choices$label <- paste(choices$form_name,"-",choices$field_label,"-",choices$name)
   rownames(choices) <- NULL
   return(choices)
 }
@@ -85,35 +94,16 @@ annotate_choices <- function(DB){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
   choices <- DB$metadata$choices[,c("field_name", "code", "name")]
-  choices <- unique(fields$field_name) %>%
-    lapply(function(IN){
-      choices[which(choices$field_name==IN),]
-    }) %>% dplyr::bind_rows()
-  choices <- choices %>% merge(
-    fields %>% dplyr::select(
-      "form_name","field_name","field_label","field_type","field_type_R"),by="field_name",sort=F)
-  choices$form_name <- 1:nrow(choices) %>% lapply(function(i){
-    form_name <- choices$form_name[i]
-    field_name <- choices$field_name[i]
-    if(!form_name %in% names(DB$data)){
-      if(DB$internals$merge_form_name %in% names(DB$data)){
-        if(field_name%in%colnames(DB$data$merged))return(DB$internals$merge_form_name)
-      }
-      for(other in names(DB$data)[which(!names(DB$data)%in%DB$metadata$forms$instrument_name)]){
-        if(field_name%in%colnames(DB$data[[other]]))return(other)
-      }
-    }
-    return(form_name)
-  }) %>% unlist()
-  choices$field_name_raw <- choices$field_name
-  choices$field_name_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name[which(choices$field_type=="checkbox_choice")] %>%
-    strsplit("___") %>%
-    sapply(function(X){X[[1]]})
-  choices$field_label_raw <- choices$field_label
-  choices$field_label_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name_raw[which(choices$field_type=="checkbox_choice")] %>%
-    sapply(function(X){
-      DB$metadata$fields$field_label[which(fields$field_name==X)] %>% unique()
-    })
+
+  # choices$field_name_raw <- choices$field_name
+  # choices$field_name_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name[which(choices$field_type=="checkbox_choice")] %>%
+  #   strsplit("___") %>%
+  #   sapply(function(X){X[[1]]})
+  # choices$field_label_raw <- choices$field_label
+  # choices$field_label_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name_raw[which(choices$field_type=="checkbox_choice")] %>%
+  #   sapply(function(X){
+  #     DB$metadata$fields$field_label[which(fields$field_name==X)] %>% unique()
+  #   })
   choices$n <- 1:nrow(choices) %>% lapply(function(i){
     DF <- DB$data[[choices$form_name[i]]]
     if(nrow(DF)==0)return(0)

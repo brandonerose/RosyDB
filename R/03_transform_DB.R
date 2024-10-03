@@ -175,7 +175,7 @@ get_original_fields <- function(DB){
   }
   return(fields)
 }
-get_transformed_fields_metadata <- function(DB){
+get_transformed_fields <- function(DB){
   transformed_fields <- NULL
   for(field_name in names(DB$transformation$fields)){
     transformed_fields <- dplyr::bind_rows(transformed_fields,DB$transformation$fields[[field_name]]$field_row)
@@ -188,7 +188,11 @@ insert_new_fields_to_metadata <- function(DB){
     bullet_in_console("Nothing to add. Use `add_edit_fields()`",bullet_type = "x")
     return(DB)
   }
-  fields <- DB$metadata$fields
+  if(!DB$internals$is_transformed){
+    bullet_in_console("'insert_new_fields_to_metadata' is meant to be used on tran",bullet_type = "x")
+    return(DB)
+  }
+  fields <- get_original_fields(DB)
   for(field_name in the_names){
     field_row <- DB$transformation$fields[[field_name]]$field_row
     form_name <- field_row$form_name
@@ -219,8 +223,7 @@ insert_new_fields_to_metadata <- function(DB){
     if(i < nrow(fields))bottom <- fields[(i+1):nrow(fields),]
     fields <- top %>% dplyr::bind_rows(field_row) %>% dplyr::bind_rows(bottom)
   }
-  fields_original <-
-    DB$metadata$fields <- fields
+  fields_original <- DB$metadata$fields <- fields
   bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
   return(DB)
 }
