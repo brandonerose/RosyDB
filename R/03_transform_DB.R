@@ -86,6 +86,7 @@ default_fields_transformation <- function(DB){
       )
     }
   }
+  fields_transformation <- DB$transformation$fields
   return(fields_transformation)
 }
 #' @title add_forms_transformation
@@ -162,9 +163,8 @@ add_field_transformation <- function(
     field_label_short = field_label
   )
   if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
-  DB$transformation$fields[[field_name]]<-list()
-  DB$transformation$fields[[field_name]]$field_row <- field_row
-  DB$transformation$fields[[field_name]]$field_func <- data_func
+  field_row$field_func <- data_func %>% deparse()
+  DB$transformation$fields[[field_name]] <- field_row
   message("added '",field_name,"' column")
   return(DB)
 }
