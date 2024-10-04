@@ -5,25 +5,24 @@
 fields_to_choices <- function(fields){
   fields <- fields[which(fields$field_type%in%c("radio","dropdown","checkbox_choice","yesno")),]
   fields$field_name[which(fields$field_type=="checkbox_choice")] <- fields$field_name[which(fields$field_type=="checkbox_choice")] %>% strsplit("___") %>% sapply(function(X){X[[1]]})
+  fields <- fields[which(!is.na(fields$select_choices_or_calculations)),]
   choices <- NULL
-  if(length(rows_with_choices)>0){
-    for(i in 1:nrow(fields)){
-      field_name <- fields$field_name[i]
-      form_name <- fields$form_name[i]
-      field_label <- fields$field_label[i]
-      field_type <- fields$field_type[i]
-      selections <- fields$select_choices_or_calculations[i] %>% split_choices()
-      choices <- choices %>% dplyr::bind_rows(
-        data.frame(
-          form_name = form_name,
-          field_name = field_name,
-          field_type = field_type,
-          field_label =  ifelse(!is.na(field_label),field_label,field_name),
-          code = selections$code,
-          name =selections$name
-        )
+  for(i in 1:nrow(fields)){
+    field_name <- fields$field_name[i]
+    form_name <- fields$form_name[i]
+    field_label <- fields$field_label[i]
+    field_type <- fields$field_type[i]
+    selections <- fields$select_choices_or_calculations[i] %>% split_choices()
+    choices <- choices %>% dplyr::bind_rows(
+      data.frame(
+        form_name = form_name,
+        field_name = field_name,
+        field_type = field_type,
+        field_label =  ifelse(!is.na(field_label),field_label,field_name),
+        code = selections$code,
+        name =selections$name
       )
-    }
+    )
   }
   choices$label <- paste(choices$form_name,"-",choices$field_label,"-",choices$name)
   rownames(choices) <- NULL
