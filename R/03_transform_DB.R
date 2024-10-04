@@ -149,6 +149,7 @@ add_field_transformation <- function(
     if(is.na(field_note))field_note <- original_fields_row$field_note
     if(identifier=="")identifier <- original_fields_row$identifier
   }
+  if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
   field_row <- data.frame(
     field_name = field_name,
     form_name = form_name,
@@ -160,10 +161,9 @@ add_field_transformation <- function(
     field_type_R = field_type_R,
     units = units,
     in_original_redcap = in_original_redcap,
-    field_label_short = field_label
+    field_label_short = field_label,
+    field_func = data_func %>% function_to_string()
   )
-  if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
-  field_row$field_func <- data_func %>% deparse()
   DB$transformation$fields[[field_name]] <- field_row
   message("added '",field_name,"' column")
   return(DB)
