@@ -150,6 +150,13 @@ add_field_transformation <- function(
     if(identifier=="")identifier <- original_fields_row$identifier
   }
   if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
+  if(!is.null(data_func)){
+    func_template <- "data_func = function(DB,field_name){YOUR FUNCTION}"
+    if(!is.function(data_func))stop("`data_func` must be a function ... ",func_template)
+    allowed_args <- c("DB","field_name")
+    if(all(!allowed_args %in% names(formals(data_func))))stop("`data_func` must have two aruguments (DB and field_name) ... ",func_template)
+    if(any(!names(formals(data_func)) %in% allowed_args))stop("`data_func` can only have two aruguments (DB and field_name) ... ",func_template)
+  }
   field_row <- data.frame(
     field_name = field_name,
     form_name = form_name,
