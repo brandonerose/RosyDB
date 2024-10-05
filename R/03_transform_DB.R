@@ -1,5 +1,7 @@
 #' @import RosyUtils
 #' @import RosyApp
+#' @title get_original_forms
+#' @export
 get_original_forms <- function(DB){
   forms <- DB$metadata$forms
   if(DB$internals$is_transformed){
@@ -7,6 +9,8 @@ get_original_forms <- function(DB){
   }
   return(forms)
 }
+#' @title get_original_fields
+#' @export
 get_original_fields <- function(DB){
   fields <- DB$metadata$fields
   if(DB$internals$is_transformed){
@@ -35,6 +39,9 @@ get_transformed_forms <- function(DB){
 #' @export
 default_forms_transformation <- function(DB){
   forms_transformation <- get_original_forms(DB)
+  if("repeating_via_events"%in% colnames(forms_transformation)){
+    forms_transformation <- forms_transformation[order(forms_transformation$repeating_via_events),]
+  }
   forms_transformation <- forms_transformation[order(forms_transformation$repeating),]
   merge_form_name <- DB$internals$merge_form_name
   forms_transformation$form_name_remap <- forms_transformation$form_name
