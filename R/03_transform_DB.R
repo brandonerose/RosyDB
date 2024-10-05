@@ -61,7 +61,7 @@ default_forms_transformation <- function(DB){
 #' @title default_forms_transformation
 #' @export
 default_fields_transformation <- function(DB){
-  fields_transformation <- list()
+  fields_transformation <- NULL
   DB$metadata$form_key_cols %>% names() %>% lapply(function(form_name){
     DB$metadata$form_key_cols[[form_name]]
   })
@@ -143,6 +143,9 @@ add_field_transformation <- function(
     data_func = NULL
 ) {
   DB <-validate_DB(DB)
+  if(wl(DB$transformation$fields$field_name==field_name)>0){
+    DB$transformation$fields <- DB$transformation$fields[which(DB$transformation$fields$field_name!=field_name),]
+  }
   # if(!DB$data %>% is_something())stop("Must have transformed data to add new vars.")
   fields <- get_original_fields(DB)
   in_original_redcap <- field_name %in% fields$field_name
@@ -178,7 +181,7 @@ add_field_transformation <- function(
     field_label_short = field_label,
     field_func = data_func %>% function_to_string()
   )
-  DB$transformation$fields[[field_name]] <- field_row
+  DB$transformation$fields <- DB$transformation$fields %>% dplyr::bind_rows(field_row)
   message("added '",field_name,"' column")
   return(DB)
 }
