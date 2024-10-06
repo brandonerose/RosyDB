@@ -53,7 +53,18 @@ default_forms_transformation <- function(DB){
   }
   forms_transformation$form_label_remap[which(!forms_transformation$repeating)] <- merge_form_name_label
   forms_transformation$merge_to <- merge_form_name
-  forms_transformation$by.y <- forms_transformation$by.x <- forms_transformation$merge_to %>% sapply(function(form_name){ DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+")})
+  forms_transformation$by.y <- forms_transformation$by.x <- forms_transformation$merge_to %>% sapply(function(form_name){
+    if(form_name %in% names(DB$metadata$form_key_cols)){
+      DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+") %>% return()
+    }else{
+      return(NA)
+      # rows<- which(!DB$metadata$forms$repeating)
+      # if(length(rows)>0){
+      #   form_name <- DB$metadata$forms$form_name[rows[[1]]]
+      # }
+      # DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+") %>% return()
+    }
+  })
   forms_transformation$x_first <- F
   forms_transformation$x_first[which(forms_transformation$repeating)] <- T
   return(forms_transformation)
