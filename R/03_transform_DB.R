@@ -92,18 +92,16 @@ default_fields_transformation <- function(DB){
     for(form_name in form_names){
       form_label <- forms$form_label[which(forms$form_name==form_name)]
       DB <- DB %>% add_field_transformation(
-        field_name = paste0("n_",form_name,"_forms"),
+        field_name = paste0("n_forms_",form_name),
         form_name = last_non_rep,
         field_type = "text",
         field_type_R = "integer",
         field_label = paste0(form_label," Forms"),
         units = "n",
-        data_func = function(DB,field_name){
-          forms<- get_original_forms(DB)
-          form_name <- field_names_to_form_names(DB,field_names = field_name)
-          last_non_rep <- forms$form_name[which(!forms$repeating)] %>% dplyr::last()
-          id_col <- DB$metadata$form_key_cols[[last_non_rep]]
-          DB$data[[last_non_rep]][[id_col]] %>% matches(DB$data[[form_name]][[id_col]],count_only = T) %>% as.character() %>% return()
+        data_func = function(DB,field_name,form_name){
+          form <- gsub("n_forms_","",field_name)
+          id_col <- DB$metadata$form_key_cols[[form_name]]
+          DB$data[[form_name]][[id_col]] %>% matches(DB$data[[form]][[id_col]],count_only = T) %>% as.character() %>% return()
         }
       )
     }
@@ -116,8 +114,7 @@ default_fields_transformation <- function(DB){
       field_type = "text",
       field_type_R = "character",
       field_label = paste(form_label,"Compound Key"),
-      data_func = function(DB,field_name){
-        form_name <- field_names_to_form_names(DB,field_names = field_name)
+      data_func = function(DB,field_name,form_name){
         cols <- DB$metadata$form_key_cols[[form_name]]
         OUT <- NULL
         while(length(cols)>0){
@@ -202,7 +199,7 @@ add_field_transformation <- function(
   if(!is.null(data_func)){
     func_template <- "data_func = function(DB,field_name){YOUR FUNCTION}"
     if(!is.function(data_func))stop("`data_func` must be a function ... ",func_template)
-    allowed_args <- c("DB","field_name")
+    allowed_args <- c("DB","field_name","form_name")
     if(all(!allowed_args %in% names(formals(data_func))))stop("`data_func` must have two aruguments (DB and field_name) ... ",func_template)
     if(any(!names(formals(data_func)) %in% allowed_args))stop("`data_func` can only have two aruguments (DB and field_name) ... ",func_template)
   }
@@ -283,7 +280,7 @@ run_fields_transformation <- function(DB,ask = T){
     form_name <- row_of_interest$form_name
     if(row_of_interest$field_func!="NULL"){
       restored_func <- eval(parse(text = row_of_interest$field_func))
-      OUT <- restored_func(DB = DB, field_name = field_name)
+      OUT <- restored_func(DB = DB, field_name = field_name,form_name = form_name)
     }
     if(field_name %in% the_names_existing){
       OLD <- DB$data[[form_name]][[field_name]]
