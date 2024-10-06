@@ -219,14 +219,14 @@ add_field_transformation <- function(
   return(DB)
 }
 combine_original_transformed_fields <- function(DB){
-  the_names <- names(DB$transformation$fields)
+  the_names <- DB$transformation$fields$field_name
   if(is.null(the_names)){
     bullet_in_console("Nothing to add. Use `add_field_transformation()`",bullet_type = "x")
     return(DB)
   }
   fields <- get_original_fields(DB)
   for(field_name in the_names){
-    field_row <- DB$transformation$fields[[field_name]]$field_row
+    field_row <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- field_row$form_name
     # if(any(fields$field_name==field_name))stop("field_name already included")
     current_row <- which(fields$field_name==field_name)
@@ -316,6 +316,7 @@ transform_DB <- function(DB,ask = T){
   })
   names(DB$transformation$original_col_names) <- DB$data %>% names()
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
+  if(is_something(process_df_list(DB$data,silent = T)))DB <- run_fields_transformation(DB,ask = ask)
   OUT <- NULL
   for(i in (1:nrow(forms_transformation))){
     TABLE <- forms_transformation$form_name[i]
@@ -403,7 +404,6 @@ transform_DB <- function(DB,ask = T){
   fields <- fields[order(match(fields$form_name,transformation_edit$form_name)),]
   DB <- combine_original_transformed_fields(DB)
   DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
-  if(is_something(process_df_list(DB$data,silent = T)))DB <- run_fields_transformation(DB,ask = ask)
   DB$internals$last_data_transformation <- Sys.time()
   return(DB)
 }

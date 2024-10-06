@@ -20,7 +20,13 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
     data = NULL, #model
     data_update = NULL,
     quality_checks = NULL,
-    transformation = NULL,
+    transformation = list(
+      forms = NULL,
+      fields = NULL,
+      original_forms = NULL,
+      original_fields = NULL,
+      data_updates = NULL
+    ),
     summary = list(
       subsets=NULL
     ),
