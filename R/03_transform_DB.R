@@ -72,37 +72,59 @@ default_forms_transformation <- function(DB){
 #' @title default_forms_transformation
 #' @export
 default_fields_transformation <- function(DB){
+  DB$transformation$fields <- NULL
   fields_transformation <- NULL
   DB$metadata$form_key_cols %>% names() %>% lapply(function(form_name){
     DB$metadata$form_key_cols[[form_name]]
   })
   forms <- get_original_forms(DB)
-  for(form_name in forms$form_name){
-    cols <- DB$metadata$form_key_cols[[form_name]]
-    if(length(cols)>1){
+  last_non_rep <- forms$form_name[which(!forms$repeating)] %>% dplyr::last()
+  form_names <- forms$form_name[which(forms$repeating)]
+  id_col <- DB$metadata$form_key_cols[[last_non_rep]]
+  has_non_rep <- length(last_non_rep)>0
+  if(has_non_rep){
+    for(form_name in form_names){
       form_label <- forms$form_label[which(forms$form_name==form_name)]
       DB <- DB %>% add_field_transformation(
-        field_name = paste0(form_name,"_compound_key"),
-        form_name = form_name,
+        field_name = paste0("n_",form_name,"_forms"),
+        form_name = last_non_rep,
         field_type = "text",
-        field_type_R = "character",
-        field_label = paste(form_label,"Compound Key"),
+        field_type_R = "integer",
+        field_label = paste0(form_label," Forms"),
+        units = "n",
         data_func = function(DB,field_name){
-          form_name<- DB$transformation$fields[[field_name]]$field_row$form_name
-          cols <- DB$metadata$form_key_cols[[form_name]]
-          OUT <- NULL
-          while(length(cols)>0){
-            if(is.null(OUT)){
-              OUT <- DB$data[[form_name]][[cols[1]]]
-            }else{
-              OUT <- OUT %>% paste0("_",DB$data[[form_name]][[cols[1]]])
-            }
-            cols <- cols[-1]
-          }
-          return(OUT)
+          forms<- get_original_forms(DB)
+          form_name <- field_names_to_form_names(DB,field_names = field_name)
+          last_non_rep <- forms$form_name[which(!forms$repeating)] %>% dplyr::last()
+          id_col <- DB$metadata$form_key_cols[[last_non_rep]]
+          DB$data[[last_non_rep]][[id_col]] %>% matches(DB$data[[form_name]][[id_col]],count_only = T) %>% as.character() %>% return()
         }
       )
     }
+  }
+  for(form_name in form_names){
+    form_label <- forms$form_label[which(forms$form_name==form_name)]
+    DB <- DB %>% add_field_transformation(
+      field_name = paste0(form_name,"_compound_key"),
+      form_name = form_name,
+      field_type = "text",
+      field_type_R = "character",
+      field_label = paste(form_label,"Compound Key"),
+      data_func = function(DB,field_name){
+        form_name <- field_names_to_form_names(DB,field_names = field_name)
+        cols <- DB$metadata$form_key_cols[[form_name]]
+        OUT <- NULL
+        while(length(cols)>0){
+          if(is.null(OUT)){
+            OUT <- DB$data[[form_name]][[cols[1]]]
+          }else{
+            OUT <- OUT %>% paste0("_",DB$data[[form_name]][[cols[1]]])
+          }
+          cols <- cols[-1]
+        }
+        return(OUT)
+      }
+    )
   }
   fields_transformation <- DB$transformation$fields
   return(fields_transformation)
@@ -240,7 +262,7 @@ combine_original_transformed_fields <- function(DB){
 #' @title run_fields_transformation
 #' @export
 run_fields_transformation <- function(DB,ask = T){
-  the_names <- names(DB$transformation$fields)
+  the_names <- DB$transformation$fields$field_name
   if(is.null(the_names)){
     bullet_in_console("Nothing to run. Use `add_field_transformation()`",bullet_type = "x")
     return(DB)
@@ -251,9 +273,11 @@ run_fields_transformation <- function(DB,ask = T){
   fields_to_update <- NULL
   for(field_name in c(the_names_existing,the_names_new)){
     OUT <- NA
-    form_name <- DB$transformation$fields[[field_name]]$field_row$form_name
-    if(!is.null(DB$transformation$fields[[field_name]]$field_func)){
-      OUT <- DB$transformation$fields[[field_name]]$field_func(DB = DB, field_name = field_name)
+    row_of_interest <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
+    form_name <- row_of_interest$form_name
+    if(row_of_interest$field_func!="NULL"){
+      restored_func <- eval(parse(text = row_of_interest$field_func))
+      OUT <- restored_func(DB = DB, field_name = field_name)
     }
     if(field_name %in% the_names_existing){
       OLD <- DB$data[[form_name]][[field_name]]
