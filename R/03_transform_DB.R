@@ -72,8 +72,14 @@ default_forms_transformation <- function(DB){
 #' @title default_forms_transformation
 #' @export
 default_fields_transformation <- function(DB){
-  # DB$transformation$fields <- NA
-  fields_transformation <- DB$transformation$fields
+  DB$transformation <- list(
+    forms = NULL,
+    fields = NULL,
+    original_forms = NULL,
+    original_fields = NULL,
+    data_updates = NULL
+  )
+  fields_transformation <- NULL
   DB$metadata$form_key_cols %>% names() %>% lapply(function(form_name){
     DB$metadata$form_key_cols[[form_name]]
   })
