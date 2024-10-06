@@ -258,9 +258,7 @@ combine_original_transformed_fields <- function(DB){
     if(i < nrow(fields))bottom <- fields[(i+1):nrow(fields),]
     fields <- top %>% dplyr::bind_rows(field_row) %>% dplyr::bind_rows(bottom)
   }
-  fields_original <- DB$metadata$fields <- fields
-  bullet_in_console(paste0("Added mod fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
-  return(DB)
+  return(fields)
 }
 #' @title run_fields_transformation
 #' @export
@@ -402,10 +400,11 @@ transform_DB <- function(DB,ask = T){
   DB$transformation$original_forms <- DB$metadata$forms
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   #fields------------
-  fields <- DB$transformation$original_fields <- DB$metadata$fields
+  DB$transformation$original_fields <- DB$metadata$fields
+  fields <- combine_original_transformed_fields(DB)
   fields$form_name <- forms_transformation$form_name_remap[match(fields$form_name,forms_transformation$form_name)]
-  fields <- fields[order(match(fields$form_name,transformation_edit$form_name)),]
-  DB <- combine_original_transformed_fields(DB)
+  DB$metadata$fields <- fields[order(match(fields$form_name,forms_transformation$form_name)),]
+  bullet_in_console(paste0("Added mod fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
   DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
   DB$internals$last_data_transformation <- Sys.time()
   return(DB)
