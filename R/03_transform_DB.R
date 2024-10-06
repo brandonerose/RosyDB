@@ -109,8 +109,8 @@ default_fields_transformation <- function(DB){
 }
 #' @title add_forms_transformation
 #' @export
-add_forms_transformation <- function(DB,forms_tranformation,ask=T){
-  if(missing(forms_tranformation))forms_tranformation <- default_forms_transformation(DB)
+add_forms_transformation <- function(DB,forms_transformation,ask=T){
+  if(missing(forms_transformation))forms_transformation <- default_forms_transformation(DB)
   forms_tranformation_cols <-c(
     "form_name",
     "form_label",
@@ -122,20 +122,20 @@ add_forms_transformation <- function(DB,forms_tranformation,ask=T){
     "by.y",
     "x_first"
   )
-  if(any(!names(forms_tranformation)%in%forms_tranformation_cols)){
+  if(any(!names(forms_transformation)%in%forms_tranformation_cols)){
     bullet_in_console("Use `default_forms_transformation(DB)` is an example!")
-    stop("forms_tranformation needs the following colnames... ", forms_tranformation_cols %>% as_comma_string())
+    stop("forms_transformation needs the following colnames... ", forms_tranformation_cols %>% as_comma_string())
   }
   choice <- T
   if(!is.null(DB$transformation)){
-    if(!identical(DB$transformation$forms,forms_tranformation)){
+    if(!identical(DB$transformation$forms,forms_transformation)){
       if(ask){
         choice <- utils::askYesNo("Do you want to add transformation? (it doesn't match previous transform)")
       }
     }
   }
   #add more checks
-  DB$transformation$forms <- forms_tranformation
+  DB$transformation$forms <- forms_transformation
   return(DB)
 }
 #' @title add_field_transformation

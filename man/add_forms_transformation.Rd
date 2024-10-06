@@ -4,7 +4,7 @@
 \alias{add_forms_transformation}
 \title{add_forms_transformation}
 \usage{
-add_forms_transformation(DB, forms_tranformation, ask = T)
+add_forms_transformation(DB, forms_transformation, ask = T)
 }
 \description{
 add_forms_transformation
