@@ -57,12 +57,10 @@ default_forms_transformation <- function(DB){
     if(form_name %in% names(DB$metadata$form_key_cols)){
       DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+") %>% return()
     }else{
-      return(NA)
-      # rows<- which(!DB$metadata$forms$repeating)
-      # if(length(rows)>0){
-      #   form_name <- DB$metadata$forms$form_name[rows[[1]]]
-      # }
-      # DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+") %>% return()
+      rows<- which(!forms_transformation$repeating)
+      if(length(rows)==0)return(NA)
+      form_name <- forms_transformation$form_name[rows[[1]]]
+      DB$metadata$form_key_cols[[form_name]] %>% paste0(collapse = "+") %>% return()
     }
   })
   forms_transformation$x_first <- F
