@@ -67,25 +67,23 @@ annotate_fields <- function(DB,skim= T){
         fields[which(fields$field_name==IN),]
       }) %>% dplyr::bind_rows()
   }
-  DB$metadata$fields <- fields
+  DB$summary$fields <- fields
   bullet_in_console("Annotated `DB$metadata$fields`",bullet_type = "v")
   return(DB)
 }
 #' @title annotate_forms
 #' @export
-annotate_forms <- function(DB,forms){
-  choice <- "form_name"
-  if("former_form_names" %in% colnames(forms)){
-    choice <- "former_form_names"
-  }
+annotate_forms <- function(DB){
+  forms <- DB$metadata$forms
   for(status in c("Incomplete","Unverified","Complete")){
-    forms[[tolower(status)]] <- forms[[choice]] %>% sapply(function(former_form_names){
-      former_form_names %>% strsplit(" [:|:] ") %>% unlist() %>%  sapply(function(form_name){
-        (DB[[get_default_data_choice(DB)]][[form_name]][[paste0(form_name,"_complete")]]==status) %>% which() %>% length()
+    forms[[tolower(status)]] <- forms$form_name %>% sapply(function(form_name){
+      form_name %>% strsplit(" [:|:] ") %>% unlist() %>% sapply(function(form_name){
+        (DB$data[[form_name]][[paste0(form_name,"_complete")]]==status) %>% which() %>% length()
       }) %>% paste0(collapse = " | ")
     })
   }
-  return(forms)
+  DB$summary$forms <- forms
+  return(DB)
 }
 #' @title annotate_choices
 #' @export
@@ -114,8 +112,8 @@ annotate_choices <- function(DB){
   }) %>% unlist()
   choices$perc <-  (choices$n/choices$n_total) %>% round(4)
   choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
-  DB$metadata$choices <- choices
-  bullet_in_console("Annotated `DB$metadata$choices`",bullet_type = "v")
+  DB$summary$choices <- choices
+  bullet_in_console("Annotated `DB$summary$choices`",bullet_type = "v")
   return(DB)
 }
 #' @title fields_with_no_data

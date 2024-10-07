@@ -404,6 +404,9 @@ transform_DB <- function(DB,ask = T){
   DB$metadata$forms <- forms_transformation[,cols_to_keep] %>% unique()
   colnames(DB$metadata$forms)[which(colnames(DB$metadata$forms)=="form_name_remap")] <-"form_name"
   colnames(DB$metadata$forms)[which(colnames(DB$metadata$forms)=="form_label_remap")] <-"form_label"
+  DB$metadata$forms$original_form_name <- DB$metadata$forms$form_name %>% sapply(function(form_name){
+    forms_transformation$form_name[which(forms_transformation$form_name_remap==form_name)] %>% paste0(collapse = " | ")
+  }) %>% as.character()
   # fields------------
   DB$transformation$original_fields <- DB$metadata$fields
   fields <- combine_original_transformed_fields(DB)
