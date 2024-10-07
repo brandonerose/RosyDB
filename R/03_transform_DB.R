@@ -221,11 +221,11 @@ add_field_transformation <- function(
 }
 combine_original_transformed_fields <- function(DB){
   the_names <- DB$transformation$fields$field_name
+  fields <- get_original_fields(DB)
   if(is.null(the_names)){
     bullet_in_console("Nothing to add. Use `add_field_transformation()`",bullet_type = "x")
-    return(DB)
+    return(fields)
   }
-  fields <- get_original_fields(DB)
   for(field_name in the_names){
     field_row <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- field_row$form_name
