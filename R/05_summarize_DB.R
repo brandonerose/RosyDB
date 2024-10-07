@@ -7,17 +7,12 @@
 summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$internals$reference_state){
   #project --------
   # DB$summary$users <- DB$redcap$users
-  df_names <- c("metadata","forms","event_mapping","events","arms")
-  # if(data_choice == "data"){
-  #   df_names <- c(df_names,paste0(df_names,"_remap"))
-  #   redcap_remap <- "remap"
-  # }
-  for(i in 1:length(df_names)){
+  df_list<-DB$metadata %>% process_df_list(silent = T)
+  for(z in 1:length(df_names)){
     x <- DB$metadata[[df_names[i]]]
     if(!is.null(x)) DB$summary[[df_names[i]]] <- x
   }
   #records belong to arms 1 to 1 ----------
-  DB$summary$data_choice <- data_choice
   DB$summary$all_records_n <- 0
   if(!is.null(DB$summary$all_records)){
     original_data <- DB$data
@@ -64,7 +59,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   # DB$metadata$fields$field_type[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive"))] %>% table()
   DB$summary$metadata <- DB %>%  annotate_redcap_metadata(metadata = DB$summary$metadata, data_choice = data_choice)
   #metadata/codebook =============
-  codebook <- fields_to_choices(DB$summary$metadata) %>% annotate_choices(metadata =DB$summary$metadata,data_choice = data_choice,DB = DB)
+  codebook <- fields_to_choices(DB$summary$fields) %>% annotate_choices(metadata =DB$summary$metadata,data_choice = data_choice,DB = DB)
   if(drop_blanks) codebook <- codebook[which(codebook$n>0),]
   DB$metadata$choices <- codebook
   #cross_codebook ------
@@ -88,7 +83,7 @@ rmarkdown_DB <- function (DB,dir_other){
   )
 }
 #' @export
-save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"output"),file_name = paste0(DB$short_name,"_RosyREDCap"),separate = F,data_choice = "data"){
+save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"output"),file_name = paste0(DB$short_name,"_RosyREDCap"),separate = F){
   DB <- DB %>% validate_RosyREDCap()
   to_save_list <- append(DB$data,DB[["summary"]])
   to_save_list <- to_save_list[which(to_save_list %>% sapply(is.data.frame))]

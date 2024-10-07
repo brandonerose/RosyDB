@@ -395,13 +395,27 @@ transform_DB <- function(DB,ask = T){
   if(any(!names(OUT)%in%unique(forms_transformation$form_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
   DB$internals$is_transformed <- T
-  DB$transformation$original_forms <- DB$metadata$forms
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
-  #fields------------
+  # forms ---------
+  DB$transformation$original_forms <- DB$metadata$forms
+  #new function RosyUtils
+  cols_to_keep <- c("form_name_remap","form_label_remap","repeating","repeating_via_events")
+  cols_to_keep <- cols_to_keep[which(cols_to_keep%in% colnames(forms_transformation))]
+  DB$metadata$forms <- forms_transformation[,cols_to_keep] %>% unique()
+  colnames(DB$metadata$forms)[which(colnames(DB$metadata$forms)=="form_name_remap")] <-"form_name"
+  colnames(DB$metadata$forms)[which(colnames(DB$metadata$forms)=="form_label_remap")] <-"form_label"
+  # fields------------
   DB$transformation$original_fields <- DB$metadata$fields
   fields <- combine_original_transformed_fields(DB)
+  fields$original_form_name <- fields$form_name
   fields$form_name <- forms_transformation$form_name_remap[match(fields$form_name,forms_transformation$form_name)]
-  DB$metadata$fields <- fields[order(match(fields$form_name,forms_transformation$form_name)),]
+  fields <- fields[order(match(fields$form_name,forms_transformation$form_name)),]
+  #new function RosyUtils
+  first <- 1:which(colnames(fields)=="form_name")
+  move <- which(colnames(fields)=="original_form_name")
+  last <- which(colnames(fields)!="original_form_name")[-first]
+  fields <-fields[,c(first,move,last)]
+  DB$metadata$fields <- fields
   bullet_in_console(paste0("Added mod fields to ",DB$short_name," `DB$metadata$fields`"),bullet_type = "v")
   DB$metadata$choices <- fields_to_choices(DB$metadata$fields)
   DB$internals$last_data_transformation <- Sys.time()
