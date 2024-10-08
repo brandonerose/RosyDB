@@ -4,7 +4,7 @@
 #' @param records character vector of records to be summarized
 #' @param drop_blanks optional logical for dropping blanks
 #' @export
-summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$internals$reference_state){
+summarize_DB <- function(DB,records = NULL,drop_blanks = T){
   #project --------
   # DB$summary$users <- DB$redcap$users
   df_list<-DB$metadata %>% process_df_list(silent = T)
@@ -17,7 +17,7 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T, data_choice = DB$int
   if(!is.null(DB$summary$all_records)){
     original_data <- DB$data
     if(!is.null(records)){
-      DB$data <- DB %>% filter_DB(records = records,data_choice = data_choice)
+      DB$data <- DB %>% filter_DB(records = records)
       DB$summary$selected_records <- DB$summary$all_records[which( DB$summary$all_records[[DB$redcap$id_col]]%in% records),]
       DB$summary$selected_records_n <- DB$summary$selected_records %>% nrow()
     }
@@ -146,8 +146,8 @@ get_all_field_names <- function(DB){
 field_names_to_form_names <- function(DB,field_names,only_unique = T){
   form_key_cols <- DB$metadata$form_key_cols %>% unlist() %>% unique()
   field_names <- field_names[which(!field_names%in%form_key_cols)]
-  fields <- get_original_fields(DB)
-  form_names <- fields$form_name[match(field_names, DB$metadata$fields$field_name)] %>% drop_nas()
+  fields <- DB$metadata$fields
+  form_names <- fields$form_name[match(field_names, fields$field_name)] %>% drop_nas()
   if(only_unique)form_names <- unique(form_names)
   return(form_names)
 }

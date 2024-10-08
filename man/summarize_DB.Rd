@@ -4,12 +4,7 @@
 \alias{summarize_DB}
 \title{Summarize DB}
 \usage{
-summarize_DB(
-  DB,
-  records = NULL,
-  drop_blanks = T,
-  data_choice = DB$internals$reference_state
-)
+summarize_DB(DB, records = NULL, drop_blanks = T)
 }
 \arguments{
 \item{records}{character vector of records to be summarized}
