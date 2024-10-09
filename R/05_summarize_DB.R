@@ -4,7 +4,38 @@
 #' @param records character vector of records to be summarized
 #' @param drop_blanks optional logical for dropping blanks
 #' @export
-summarize_DB <- function(DB,records = NULL,drop_blanks = T){
+summarize_DB <- function(
+    DB,
+    subset_name,
+    records = NULL,
+    drop_blanks = T,
+    form_names = NULL,
+    field_names = NULL,
+    add_filter_var = NULL,
+    add_filter_vals = NULL,
+    warn_only = F,
+    with_links=T,
+    dir_other = file.path(DB$dir_path,"output"),
+    file_name = paste0(DB$short_name,"_RosyREDCap"),
+    separate = F
+){
+  DB <- DB %>% validate_RosyREDCap()
+  DB$summary$subsets[[subset_name]] <- list(
+    subset_name = subset_name,
+    records = DB$summary$all_records[which(DB$summary$all_records$record_id %in% records),],
+    last_save_time = Sys.time(),
+    file_path = file.path(dir_other,file_name)
+  )
+  original_metadata <- DB$metadata
+  original_data <- DB$data
+  DB$data <- filter_DB(
+    DB = DB,
+    records = records,
+    field_names = field_names,
+    form_names = form_names,
+    add_filter_var = add_filter_var,
+    add_filter_vals = add_filter_vals
+  )
   #project --------
   # DB$summary$users <- DB$redcap$users
   df_list<-DB$metadata %>% process_df_list(silent = T)
@@ -15,7 +46,6 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T){
   #records belong to arms 1 to 1 ----------
   DB$summary$all_records_n <- 0
   if(!is.null(DB$summary$all_records)){
-    original_data <- DB$data
     if(!is.null(records)){
       DB$data <- DB %>% filter_DB(records = records)
       DB$summary$selected_records <- DB$summary$all_records[which( DB$summary$all_records[[DB$redcap$id_col]]%in% records),]
@@ -64,28 +94,6 @@ summarize_DB <- function(DB,records = NULL,drop_blanks = T){
   DB$metadata$choices <- codebook
   #cross_codebook ------
   DB$data <- original_data
-  return(DB)
-}
-#' @export
-rmarkdown_DB <- function (DB,dir_other){
-  if(missing(dir_other)){
-    dir <- get_dir(DB) %>% file.path("output")
-  }else{
-    dir  <- dir_other
-  }
-  filename <- paste0(DB$short_name,"_full_summary_",gsub("-","_",Sys.Date()),".pdf")
-  rmarkdown::render(
-    input = system.file("rmarkdown","pdf.Rmd",package = pkg_name),
-    output_format = "pdf_document",
-    output_file = dir %>% file.path(filename),
-    output_dir = dir,
-    quiet = F
-  )
-}
-#' @export
-save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"output"),file_name = paste0(DB$short_name,"_RosyREDCap"),separate = F){
-  DB <- DB %>% validate_RosyREDCap()
-  to_save_list <- append(DB$data,DB[["summary"]])
   to_save_list <- to_save_list[which(to_save_list %>% sapply(is.data.frame))]
   to_save_list <- to_save_list[which((to_save_list %>% sapply(nrow) %>% unlist())>0)]
   link_col_list <- list()
@@ -113,6 +121,23 @@ save_summary <- function(DB,with_links=T,dir_other = file.path(DB$dir_path,"outp
       overwrite = TRUE
     )
   }
+  return(DB)
+}
+#' @export
+rmarkdown_DB <- function (DB,dir_other){
+  if(missing(dir_other)){
+    dir <- get_dir(DB) %>% file.path("output")
+  }else{
+    dir  <- dir_other
+  }
+  filename <- paste0(DB$short_name,"_full_summary_",gsub("-","_",Sys.Date()),".pdf")
+  rmarkdown::render(
+    input = system.file("rmarkdown","pdf.Rmd",package = pkg_name),
+    output_format = "pdf_document",
+    output_file = dir %>% file.path(filename),
+    output_dir = dir,
+    quiet = F
+  )
 }
 #' @export
 stack_vars <- function(DB,vars,new_name,drop_na=T){
@@ -205,10 +230,10 @@ all_DB_to_char_cols <- function(DB){
 filter_DB <- function(DB, records,field_names,form_names,add_filter_var,add_filter_vals,warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
   if(missing(records)) records <- DB$summary$all_records[[DB$redcap$id_col]]
   if(is.null(records)) records <- DB$summary$all_records[[DB$redcap$id_col]]
-  if(missing(field_names)){
-    field_names <- DB %>% get_all_field_names()
-  }
+  if(missing(field_names))field_names <- DB %>% get_all_field_names()
+  if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
+  if(is.null(form_names))form_names <- names(DB$data)
   if (length(records)==0)stop("Must supply records")
   selected <- list()
   BAD  <- records[which(!records%in%DB$summary$all_records[[DB$redcap$id_col]])]
@@ -217,7 +242,10 @@ filter_DB <- function(DB, records,field_names,form_names,add_filter_var,add_filt
     m <- paste0("Following records are not found in DB: ", BAD %>% paste0(collapse = ", "))
     warn_or_stop(m,warn_only = warn_only)
   }
-  run_add_filter <- !missing(add_filter_var)&&!missing(add_filter_vals)
+  run_add_filter <- F
+  if(!missing(add_filter_var)&&!missing(add_filter_vals)){
+    run_add_filter <- !is.null(add_filter_var)&&!is.null(add_filter_vals)
+  }
   for(FORM in form_names){
     OUT <- DB$data[[FORM]][which(DB$data[[FORM]][[DB$redcap$id_col]]%in%GOOD),]
     cols <- colnames(OUT)[which(colnames(OUT)%in%field_names)]

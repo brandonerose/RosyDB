@@ -90,9 +90,12 @@ validate_DB <- function(DB,silent = T,warn_only = F,allowed_names = names(blank_
       warning("Valid list but no data yet!",immediate. = T)
     }
     if(outcome_valid){
-      bullet_in_console("`DB` validated!",bullet_type = "v")
+      bullet_in_console(DB$short_name," is valid DB object!",bullet_type = "v")
     }
     bullet_in_console(DB$short_name %>% paste0(" loaded from: "),file = DB$dir_path,bullet_type = "v")
+    if(DB$internals$is_transformed){
+      bullet_in_console(DB$short_name %>% paste0(" is currently transformed! Can reverse with `untransform_DB(DB)`"),bullet_type = "i")
+    }
   }
   DB
 }

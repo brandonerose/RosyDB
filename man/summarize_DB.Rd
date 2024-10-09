@@ -4,7 +4,21 @@
 \alias{summarize_DB}
 \title{Summarize DB}
 \usage{
-summarize_DB(DB, records = NULL, drop_blanks = T)
+summarize_DB(
+  DB,
+  subset_name,
+  records = NULL,
+  drop_blanks = T,
+  form_names = NULL,
+  field_names = NULL,
+  add_filter_var = NULL,
+  add_filter_vals = NULL,
+  warn_only = F,
+  with_links = T,
+  dir_other = file.path(DB$dir_path, "output"),
+  file_name = paste0(DB$short_name, "_RosyREDCap"),
+  separate = F
+)
 }
 \arguments{
 \item{records}{character vector of records to be summarized}
