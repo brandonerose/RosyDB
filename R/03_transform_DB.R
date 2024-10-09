@@ -275,8 +275,10 @@ run_fields_transformation <- function(DB,ask = T){
     row_of_interest <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- row_of_interest$form_name
     if(row_of_interest$field_func!="NULL"){
-      restored_func <- eval(parse(text = row_of_interest$field_func))
-      OUT <- restored_func(DB = DB, field_name = field_name,form_name = form_name)
+      if(form_name %in% names(DB$data)){
+        restored_func <- eval(parse(text = row_of_interest$field_func))
+        OUT <- restored_func(DB = DB, field_name = field_name,form_name = form_name)
+      }
     }
     if(field_name %in% the_names_existing){
       OLD <- DB$data[[form_name]][[field_name]]
