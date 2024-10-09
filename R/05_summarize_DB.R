@@ -7,103 +7,49 @@
 summarize_DB <- function(
     DB,
     subset_name,
-    records = NULL,
     drop_blanks = T,
+    filter_field = NULL,
+    filter_choices = NULL,
     form_names = NULL,
     field_names = NULL,
-    add_filter_var = NULL,
-    add_filter_vals = NULL,
     warn_only = F,
     with_links=T,
     dir_other = file.path(DB$dir_path,"output"),
-    file_name = paste0(DB$short_name,"_RosyREDCap"),
+    file_name = paste0(subset_name,"_RosyREDCap"),
     separate = F
 ){
   DB <- DB %>% validate_RosyREDCap()
   DB$summary$subsets[[subset_name]] <- list(
     subset_name = subset_name,
-    records = DB$summary$all_records[which(DB$summary$all_records$record_id %in% records),],
+    filter_field = filter_field,
+    filter_choices = filter_choices,
+    # id_col = NULL,
     last_save_time = Sys.time(),
-    file_path = file.path(dir_other,file_name)
+    file_path = file.path(dir_other,paste0(file_name,".xlsx"))
   )
   original_metadata <- DB$metadata
   original_data <- DB$data
   DB$data <- filter_DB(
     DB = DB,
-    records = records,
     field_names = field_names,
     form_names = form_names,
-    add_filter_var = add_filter_var,
-    add_filter_vals = add_filter_vals
+    filter_field = filter_field,
+    filter_choices = filter_choices
   )
-  #project --------
-  # DB$summary$users <- DB$redcap$users
-  df_list<-DB$metadata %>% process_df_list(silent = T)
-  for(z in 1:length(df_names)){
-    x <- DB$metadata[[df_names[i]]]
-    if(!is.null(x)) DB$summary[[df_names[i]]] <- x
-  }
-  #records belong to arms 1 to 1 ----------
-  DB$summary$all_records_n <- 0
-  if(!is.null(DB$summary$all_records)){
-    if(!is.null(records)){
-      DB$data <- DB %>% filter_DB(records = records)
-      DB$summary$selected_records <- DB$summary$all_records[which( DB$summary$all_records[[DB$redcap$id_col]]%in% records),]
-      DB$summary$selected_records_n <- DB$summary$selected_records %>% nrow()
-    }
-    DB$summary$all_records_n <- DB$summary$all_records %>% nrow()
-    DB$summary$record_log_sum <- summarize_records_from_log(DB, records = records)
-  }
-  DB$summary$user_log_sum <- summarize_users_from_log(DB, records = records)
-  #arms----------------
-  DB$summary$arms_n <- NA
-  if(is.data.frame(DB$metadata$arms)){
-    DB$summary$arms_n <- DB$metadata$arms %>% nrow()
-    id_pairs <- DB$metadata$forms$form_name %>%  lapply(function(IN){DB$data[[IN]][,c(DB$redcap$id_col,"arm_num")]}) %>% dplyr::bind_rows() %>% unique()
-    DB$metadata$arms$arm_records_n <- DB$metadata$arms$arm_num %>% sapply(function(arm){
-      which(id_pairs$arm_num==arm)%>% length()
-    })
-  }
-  #events belong to arms many to 1 ----------------
-  # DB$summary$events_n <- DB$metadata$events %>% nrow()
-  DB$summary$events_n <- NA
-  if(is.data.frame(DB$metadata$events)){
-    DB$summary$events_n <- DB$metadata$events %>% nrow()
-    DB$summary$event_names_n <- DB$metadata$events$event_name %>% unique() %>% length()
-    # 1:nrow(DB$metadata$event_mapping) %>% lapply(function(i){
-    #   (DB$data[[DB$metadata$event_mapping$form[i]]][['redcap_event_name']]==DB$metadata$event_mapping$unique_event_name[i]) %>% which() %>% length()
-    # })
-    # for(event in ){
-    #   DB$summary[[paste0(event,"_records_n")]] <- DB$data[[]][which(DB$metadata$arms$arm_num==arm)]
-    # }
-  }
-  #forms/forms belong to events many to 1 (if no events/arms) ----------------
-  DB$summary$forms_n <- 0
-  if(is.data.frame(DB$summary$forms)){ # can add expected later
-    DB$summary$forms_n <- DB$summary$forms %>% nrow()
-    # DB$summary$forms <- DB  %>% annotate_forms(DB$summary$forms)
-  }
-  #fields belong to forms/forms 1 to 1 ----------------
-  DB$summary$metadata_n <- 0
-  DB$summary$metadata_n <- DB$metadata$fields[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive")),] %>% nrow()
-  # DB$metadata$fields$field_type[which(!DB$metadata$fields$field_type%in%c("checkbox_choice","descriptive"))] %>% table()
-  DB$summary$metadata <- DB %>%  annotate_redcap_metadata(metadata = DB$summary$metadata, data_choice = data_choice)
-  #metadata/codebook =============
-  codebook <- fields_to_choices(DB$summary$fields) %>% annotate_choices(metadata =DB$summary$metadata,data_choice = data_choice,DB = DB)
-  if(drop_blanks) codebook <- codebook[which(codebook$n>0),]
-  DB$metadata$choices <- codebook
-  #cross_codebook ------
-  DB$data <- original_data
-  to_save_list <- to_save_list[which(to_save_list %>% sapply(is.data.frame))]
-  to_save_list <- to_save_list[which((to_save_list %>% sapply(nrow) %>% unlist())>0)]
+  to_save_list <- DB$data
   link_col_list <- list()
   if(with_links){
-    to_save_list <-to_save_list %>% lapply(function(DF){add_redcap_links_to_DF(DF,DB)})
-    link_col_list <- list(
-      "redcap_link"
-    )
-    names(link_col_list) <- DB$redcap$id_col
+    if(DB$internals$DB_type=="redcap"){
+      to_save_list <-to_save_list %>% lapply(function(DF){add_redcap_links_to_DF(DF,DB)})
+      link_col_list <- list(
+        "redcap_link"
+      )
+      names(link_col_list) <- DB$redcap$id_col
+    }
   }
+  to_save_list$forms <- annotate_forms(DB)
+  to_save_list$fields <- annotate_fields(DB)
+  to_save_list$choices <- annotate_choices(DB)
   if(DB$internals$use_csv){
     to_save_list %>% list_to_csv(
       dir = dir_other,
@@ -121,6 +67,8 @@ summarize_DB <- function(
       overwrite = TRUE
     )
   }
+  original_metadata <- DB$metadata
+  original_data <- DB$data
   return(DB)
 }
 #' @export
@@ -219,28 +167,39 @@ all_DB_to_char_cols <- function(DB){
   return(DB)
 }
 #' @title Select REDCap records from DB
-#' @param records character vector of the IDs you want to filter the DB by
 #' @param field_names character vector of field_names to be included
 #' @param form_names character vector of form_names to be included
-#' @param add_filter_var character string of extra variable name to be filtered by if present in a data.frame
-#' @param add_filter_vals character vector of extra variable values to be filtered by if present in a data.frame
+#' @param filter_field character string of extra variable name to be filtered by if present in a data.frame
+#' @param filter_choices character vector of extra variable values to be filtered by if present in a data.frame
 #' @param warn_only logical for warn_only or stop
 #' @return DB object that has been filtered to only include the specified records
 #' @export
-filter_DB <- function(DB,form_names,field_names,field,choices,warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
-  if(missing(field)) field <- DB$redcap$id_col
-  if(is.null(field)) field <-  DB$redcap$id_col
+filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
+  if(missing(filter_field)) filter_field <- DB$redcap$id_col
+  if(is.null(filter_field)) filter_field <-  DB$redcap$id_col
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
   if(is.null(form_names))form_names <- names(DB$data)
-  if (length(records)==0)stop("Must supply records")
   selected <- list()
+  form_name <- field_names_to_form_names(DB,field_names = filter_field)
+  form_key_cols <- DB$metadata$form_key_cols[[form_name]]
+  is_repeating_filter <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==form_name)]
+  # is_key <- filter_field
   for(FORM in form_names){
     DF <- DB$data[[FORM]]
+    is_repeating_form <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==FORM)]
     if(is_something(DF)){
-      rows <-which(DB$data[[FORM]][[field]]%in%choices)
-      cols <- colnames(OUT)[which(colnames(OUT)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
+      filter_field_final <- filter_field
+      filter_choices_final <- filter_choices
+      if(is_repeating_filter){
+        if(!is_repeating_form){
+          filter_field_final <- DB$metadata$form_key_cols[[FORM]]
+          filter_choices_final <- DB$data[[form_name]][[filter_field_final]][which(DB$data[[form_name]][[filter_field]]%in%filter_choices)] %>% unique()
+        }
+      }
+      rows <-which(DB$data[[FORM]][[filter_field_final]]%in%filter_choices_final)
+      cols <- colnames(DF)[which(colnames(DF)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
       if(length(rows)>0&&length(cols)>0)selected[[FORM]] <- DF[rows,cols]
     }
   }

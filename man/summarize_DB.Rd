@@ -7,23 +7,22 @@
 summarize_DB(
   DB,
   subset_name,
-  records = NULL,
   drop_blanks = T,
+  filter_field = NULL,
+  filter_choices = NULL,
   form_names = NULL,
   field_names = NULL,
-  add_filter_var = NULL,
-  add_filter_vals = NULL,
   warn_only = F,
   with_links = T,
   dir_other = file.path(DB$dir_path, "output"),
-  file_name = paste0(DB$short_name, "_RosyREDCap"),
+  file_name = paste0(subset_name, "_RosyREDCap"),
   separate = F
 )
 }
 \arguments{
-\item{records}{character vector of records to be summarized}
-
 \item{drop_blanks}{optional logical for dropping blanks}
+
+\item{records}{character vector of records to be summarized}
 }
 \description{
 Summarize DB

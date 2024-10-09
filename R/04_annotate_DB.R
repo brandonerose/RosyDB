@@ -4,7 +4,7 @@
 #' @export
 fields_to_choices <- function(fields){
   fields <- fields[which(fields$field_type%in%c("radio","dropdown","checkbox_choice","yesno")),]
-  fields$field_name[which(fields$field_type=="checkbox_choice")] <- fields$field_name[which(fields$field_type=="checkbox_choice")] %>% strsplit("___") %>% sapply(function(X){X[[1]]})
+  # fields$field_name[which(fields$field_type=="checkbox_choice")] <- fields$field_name[which(fields$field_type=="checkbox_choice")] %>% strsplit("___") %>% sapply(function(X){X[[1]]})
   fields <- fields[which(!is.na(fields$select_choices_or_calculations)),]
   choices <- NULL
   for(i in 1:nrow(fields)){
@@ -28,8 +28,6 @@ fields_to_choices <- function(fields){
   rownames(choices) <- NULL
   return(choices)
 }
-#' @title annotate_fields
-#' @export
 annotate_fields <- function(DB,skim= T){
   fields <- DB$metadata$fields#[,colnames(get_original_fields(DB))]
   fields <- fields[which(fields$field_type!="descriptive"),]
@@ -69,12 +67,9 @@ annotate_fields <- function(DB,skim= T){
         fields[which(fields$field_name==IN),]
       }) %>% dplyr::bind_rows()
   }
-  DB$summary$fields <- fields
-  bullet_in_console("Annotated `DB$metadata$fields`",bullet_type = "v")
-  return(DB)
+  # bullet_in_console("Annotated `DB$metadata$fields`",bullet_type = "v")
+  return(fields)
 }
-#' @title annotate_forms
-#' @export
 annotate_forms <- function(DB){
   forms <- DB$metadata$forms
   for(status in c("Incomplete","Unverified","Complete")){
@@ -84,15 +79,12 @@ annotate_forms <- function(DB){
       }) %>% paste0(collapse = " | ")
     })
   }
-  DB$summary$forms <- forms
-  return(DB)
+  return(forms)
 }
-#' @title annotate_choices
-#' @export
 annotate_choices <- function(DB){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
-  choices <- DB$metadata$choices[,c("field_name", "code", "name")]
+  choices <- DB$metadata$choices
   # choices$field_name_raw <- choices$field_name
   # choices$field_name_raw[which(choices$field_type=="checkbox_choice")] <- choices$field_name[which(choices$field_type=="checkbox_choice")] %>%
   #   strsplit("___") %>%
@@ -104,8 +96,10 @@ annotate_choices <- function(DB){
   #   })
   choices$n <- 1:nrow(choices) %>% lapply(function(i){
     DF <- DB$data[[choices$form_name[i]]]
+    if(is.null(DF))return(0)
     if(nrow(DF)==0)return(0)
     sum(DF[,choices$field_name[i]]==choices$name[i],na.rm = T)
+    print(i)
   }) %>% unlist()
   choices$n_total <- 1:nrow(choices) %>% lapply(function(i){
     DF <- DB$data[[choices$form_name[i]]]
@@ -114,9 +108,9 @@ annotate_choices <- function(DB){
   }) %>% unlist()
   choices$perc <-  (choices$n/choices$n_total) %>% round(4)
   choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
-  DB$summary$choices <- choices
-  bullet_in_console("Annotated `DB$summary$choices`",bullet_type = "v")
-  return(DB)
+  # DB$summary$choices <- choices
+  # bullet_in_console("Annotated `DB$summary$choices`",bullet_type = "v")
+  return(choices)
 }
 #' @title fields_with_no_data
 #' @export
