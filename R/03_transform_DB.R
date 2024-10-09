@@ -308,7 +308,6 @@ transform_DB <- function(DB,ask = T){
     bullet_in_console("Already transformed... nothing to do!",bullet_type = "x")
     return(DB)
   }
-  named_df_list <- DB$data
   forms_transformation <- DB$transformation$forms
   DB$transformation$original_col_names <- DB$data %>% names() %>% lapply(function(l){
     DB$data[[l]] %>% colnames()
@@ -316,6 +315,7 @@ transform_DB <- function(DB,ask = T){
   names(DB$transformation$original_col_names) <- DB$data %>% names()
   # if(any(!names(transformation)%in%names(DB$data)))stop("must have all DB$data names in transformation")
   if(is_something(process_df_list(DB$data,silent = T)))DB <- run_fields_transformation(DB,ask = ask)
+  named_df_list <- DB$data
   OUT <- NULL
   for(i in (1:nrow(forms_transformation))){
     TABLE <- forms_transformation$form_name[i]

@@ -32,6 +32,8 @@ fields_to_choices <- function(fields){
 #' @export
 annotate_fields <- function(DB,skim= T){
   fields <- DB$metadata$fields#[,colnames(get_original_fields(DB))]
+  fields <- fields[which(fields$field_type!="descriptive"),]
+  fields <- fields[which(fields$field_type!="checkbox"),]
   fields$field_label[which(is.na(fields$field_label))] <- fields$field_name[which(is.na(fields$field_label))]
   fields  <- unique(fields$form_name) %>%
     lapply(function(IN){
