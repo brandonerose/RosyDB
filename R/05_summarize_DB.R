@@ -158,8 +158,8 @@ stack_vars <- function(DB,vars,new_name,drop_na=T){
   }
   return(the_stack)
 }
-get_default_fields <- function(DB){
-  if(DB$internals$is_transformed)return(DB$metadata$fields$field_name)
+get_original_field_names <- function(DB){
+  if(DB$internals$is_transformed)return(DB$transformation$original_fields$field_name)
   return(DB$metadata$fields$field_name)
 }
 #' @export
@@ -227,37 +227,21 @@ all_DB_to_char_cols <- function(DB){
 #' @param warn_only logical for warn_only or stop
 #' @return DB object that has been filtered to only include the specified records
 #' @export
-filter_DB <- function(DB, records,field_names,form_names,add_filter_var,add_filter_vals,warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
-  if(missing(records)) records <- DB$summary$all_records[[DB$redcap$id_col]]
-  if(is.null(records)) records <- DB$summary$all_records[[DB$redcap$id_col]]
+filter_DB <- function(DB,form_names,field_names,field,choices,warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
+  if(missing(field)) field <- DB$redcap$id_col
+  if(is.null(field)) field <-  DB$redcap$id_col
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
   if(is.null(form_names))form_names <- names(DB$data)
   if (length(records)==0)stop("Must supply records")
   selected <- list()
-  BAD  <- records[which(!records%in%DB$summary$all_records[[DB$redcap$id_col]])]
-  GOOD  <- records[which(records%in%DB$summary$all_records[[DB$redcap$id_col]])]
-  if(length(BAD)>0){
-    m <- paste0("Following records are not found in DB: ", BAD %>% paste0(collapse = ", "))
-    warn_or_stop(m,warn_only = warn_only)
-  }
-  run_add_filter <- F
-  if(!missing(add_filter_var)&&!missing(add_filter_vals)){
-    run_add_filter <- !is.null(add_filter_var)&&!is.null(add_filter_vals)
-  }
   for(FORM in form_names){
-    OUT <- DB$data[[FORM]][which(DB$data[[FORM]][[DB$redcap$id_col]]%in%GOOD),]
-    cols <- colnames(OUT)[which(colnames(OUT)%in%field_names)]
-    if(length(cols)>0){
-      if(run_add_filter){
-        if(add_filter_var %in% colnames(OUT)){
-          OUT <-  OUT[which(OUT[[add_filter_var]] %in% add_filter_vals),]
-        }
-      }
-      # if(nrow(OUT)>0){
-      selected[[FORM]] <- OUT[,colnames(OUT)[which(colnames(OUT)%in%c(DB$redcap$raw_structure_cols,field_names))]]
-      # }
+    DF <- DB$data[[FORM]]
+    if(is_something(DF)){
+      rows <-which(DB$data[[FORM]][[field]]%in%choices)
+      cols <- colnames(OUT)[which(colnames(OUT)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
+      if(length(rows)>0&&length(cols)>0)selected[[FORM]] <- DF[rows,cols]
     }
   }
   return(selected)

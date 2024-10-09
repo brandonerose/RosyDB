@@ -4,28 +4,20 @@
 \alias{filter_DB}
 \title{Select REDCap records from DB}
 \usage{
-filter_DB(
-  DB,
-  records,
-  field_names,
-  form_names,
-  add_filter_var,
-  add_filter_vals,
-  warn_only = F
-)
+filter_DB(DB, form_names, field_names, field, choices, warn_only = F)
 }
 \arguments{
-\item{records}{character vector of the IDs you want to filter the DB by}
+\item{form_names}{character vector of form_names to be included}
 
 \item{field_names}{character vector of field_names to be included}
 
-\item{form_names}{character vector of form_names to be included}
+\item{warn_only}{logical for warn_only or stop}
+
+\item{records}{character vector of the IDs you want to filter the DB by}
 
 \item{add_filter_var}{character string of extra variable name to be filtered by if present in a data.frame}
 
 \item{add_filter_vals}{character vector of extra variable values to be filtered by if present in a data.frame}
-
-\item{warn_only}{logical for warn_only or stop}
 }
 \value{
 DB object that has been filtered to only include the specified records

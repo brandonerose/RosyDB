@@ -125,7 +125,7 @@ fields_with_no_data <- function(DB){
 }
 # generate_cross_codebook <- function(){
 #   codebook <- DB$metadata$choices
-#   metadata <- get_default_fields(DB)
+#   metadata <- get_original_field_names(DB)
 #   data_choice<-get_default_data_choice(DB)
 #
 #   cross_codebook <- codebook[,c("form_name","field_name","name")]
