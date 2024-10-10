@@ -198,7 +198,7 @@ clean_DF <- function(DF,fields,drop_blanks = T,drop_unknowns = T){
       levels <- NULL
       if(!is.na(class)){
         if(class == "factor"){
-          select_choices <- metadata$select_choices_or_calculations[ROW]
+          select_choices <- fields$select_choices_or_calculations[ROW]
           if(!is.na(select_choices)){
             levels <- split_choices(select_choices)[[2]]
           }else{
