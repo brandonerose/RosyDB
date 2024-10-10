@@ -28,6 +28,7 @@ fields_to_choices <- function(fields){
   rownames(choices) <- NULL
   return(choices)
 }
+#' @export
 annotate_fields <- function(DB,skim= T){
   fields <- DB$metadata$fields#[,colnames(get_original_fields(DB))]
   fields <- fields[which(fields$field_type!="descriptive"),]
@@ -70,6 +71,7 @@ annotate_fields <- function(DB,skim= T){
   # bullet_in_console("Annotated `DB$metadata$fields`",bullet_type = "v")
   return(fields)
 }
+#' @export
 annotate_forms <- function(DB){
   forms <- DB$metadata$forms
   for(status in c("Incomplete","Unverified","Complete")){
@@ -81,6 +83,7 @@ annotate_forms <- function(DB){
   }
   return(forms)
 }
+#' @export
 annotate_choices <- function(DB){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
