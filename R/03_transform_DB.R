@@ -473,5 +473,5 @@ missing_field_names <- function(DB){
       field_name = colnames(DB$data[[form_name]])
     )
   }) %>% dplyr::bind_rows()
-  return(form_names)
+  # return(form_names)
 }

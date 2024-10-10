@@ -7,10 +7,10 @@ sidebar_choices <- function(DB,n_threshold=1){
   choices <- DB$metadata$choices
   choices <- choices[which(choices$n>=n_threshold),]
   sbc <- data.frame(
-    form_name = codebook$form_name,
-    field_name = codebook$field_name,
-    name = codebook$name,
-    label = paste0(codebook$form_name," - ",codebook$field_label," - ",codebook$name, " (n = ",clean_num(codebook$n),")")
+    form_name = choices$form_name,
+    field_name = choices$field_name,
+    name = choices$name
+    # label2 = paste0(choices$form_name," - ",choices$field_label," - ",choices$name, " (n = ",clean_num(choices$n),")")
   )
   return(sbc)
 }

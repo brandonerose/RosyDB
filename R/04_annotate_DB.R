@@ -187,14 +187,14 @@ clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
 #' @export
 clean_DF <- function(DF,fields,drop_blanks = T,drop_unknowns = T){
   for(COLUMN in colnames(DF)){
-    if(COLUMN %in% metadata$field_name){
-      ROW <- which(metadata$field_name==COLUMN)
+    if(COLUMN %in% fields$field_name){
+      ROW <- which(fields$field_name==COLUMN)
       units <- NULL
-      if(!is.na(metadata$units[ROW])){
-        units <- metadata$units[ROW]
+      if(!is.na(fields$units[ROW])){
+        units <- fields$units[ROW]
       }
-      class <- metadata$field_type_R[ROW][[1]]
-      label <- ifelse(is.na(DB$metadata$fields$field_label[ROW]),COLUMN,DB$metadata$fields$field_label[ROW])[[1]]
+      class <- fields$field_type_R[ROW][[1]]
+      label <- ifelse(is.na(fields$field_label[ROW]),COLUMN,fields$field_label[ROW])[[1]]
       levels <- NULL
       if(!is.na(class)){
         if(class == "factor"){

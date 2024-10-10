@@ -167,9 +167,9 @@ save_DB <- function(DB){
 show_DB <- function(DB,also_metadata=T,only_dfs = T){
   DB <- validate_DB(DB)
   data_list <- list()
-  DB[[data]] %>% add_list_to_global(only_dfs = only_dfs)
+  DB$data %>% add_list_to_global(only_dfs = only_dfs)
   if(also_metadata){
-    DB[["metadata"]] %>% add_list_to_global(only_dfs = only_dfs)
+    DB$metadata %>% add_list_to_global(only_dfs = only_dfs)
   }
   data_list %>% list2env(envir = .GlobalEnv)
 }

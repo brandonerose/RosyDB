@@ -16,11 +16,8 @@ rmarkdown_DB <- function (DB,dir_other){
 }
 #' @export
 stack_vars <- function(DB,vars,new_name,drop_na=T){
-  DB <- validate_RosyREDCap(DB)
-  metadata <- DB$metadata$fields
-  if(DB$internals$is_transformed){
-    metadata <- DB$remap$metadata_remap
-  }
+  DB <- validate_DB(DB)
+  fields <- DB$metadata$fields
   if(!all(vars%in%metadata$field_name))stop("all vars must be in metadata.")
   the_stack <- NULL
   for(var in vars){# var <- vars %>% sample1()
@@ -268,7 +265,7 @@ raw_to_labelled_form <- function(FORM,DB){
   FORM
 }
 labelled_to_raw_DB <- function(DB){
-  DB <- validate_RosyREDCap(DB)
+  DB <- validate_DB(DB)
   if(!DB$internals$data_extract_labelled)stop("DB is already raw/coded (not labelled values)")
   for(TABLE in names(DB$data)){
     DB$data[[TABLE]] <- labelled_to_raw_form(FORM = DB$data[[TABLE]],DB=DB)
