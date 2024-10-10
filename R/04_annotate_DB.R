@@ -106,6 +106,7 @@ annotate_choices <- function(DB){
   }) %>% unlist()
   choices$n_total <- 1:nrow(choices) %>% lapply(function(i){
     DF <- DB$data[[choices$form_name[i]]]
+    if(is.null(DF))return(0)
     if(nrow(DF)==0)return(0)
     sum(!is.na(DF[,choices$field_name[i]]),na.rm = T)
   }) %>% unlist()
