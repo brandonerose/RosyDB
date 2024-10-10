@@ -61,6 +61,7 @@ form_names_to_field_names <- function(form_names,DB){
   }
   return(unique(field_names))
 }
+#' @export
 construct_header_list <- function(df_list,md_elements = c("form_name","field_type","field_label"),fields){
   if(anyDuplicated(fields$field_name)>0)stop("dup names not allowed in fields")
   df_col_list <- df_list %>% lapply(colnames)
