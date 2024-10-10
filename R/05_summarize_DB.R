@@ -43,14 +43,15 @@ get_all_field_names <- function(DB){
 field_names_to_form_names <- function(DB,field_names){
   form_key_cols <- DB$metadata$form_key_cols %>% unlist() %>% unique()
   field_names_keys <- field_names[which(field_names%in%form_key_cols)]
-  field_names_not_keys <- field_names[which(!field_names%in%form_key_cols)]
-  form_names_not_keys <- fields$form_name[match(field_names_not_keys, fields$field_name)] %>% drop_nas()
   form_names_keys <- field_names_keys %>% sapply(function(field_name){
     DB$metadata$form_key_cols%>% names()%>% sapply(function(FORM){
       if(!field_name%in%DB$metadata$form_key_cols[[FORM]])return(NULL)
       return(FORM)
     })
   }) %>% unlist() %>% as.character() %>% unique()
+  fields <- DB$metadata$fields
+  field_names_not_keys <- field_names[which(!field_names%in%form_key_cols)]
+  form_names_not_keys <- fields$form_name[match(field_names_not_keys, fields$field_name)] %>% drop_nas()
   form_names <- c(form_names_not_keys,form_names_keys) %>% unique()
   return(form_names)
 }
