@@ -106,8 +106,6 @@ all_DB_to_char_cols <- function(DB){
 #' @return DB object that has been filtered to only include the specified records
 #' @export
 filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
-  if(missing(filter_field)) filter_field <- DB$redcap$id_col
-  if(is.null(filter_field)) filter_field <-  DB$redcap$id_col
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)

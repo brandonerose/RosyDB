@@ -89,7 +89,7 @@ read_DB_from_dir <- function(DB,allow_all=T,drop_non_form_vars=T,stop_or_warn="w
     match = NA
   )
   df$match <- strsplit(df$file_name_no_ext,"_") %>% sapply(function(IN){IN[length(IN)]})
-  df$match[which(!df$match%in%c(DB$internals$merge_form_name,DB$redcap$forms$form_name))] <- NA
+  df$match[which(!df$match%in%c(DB$internals$merge_form_name,DB$metadata$forms$form_name))] <- NA
   if(!allow_all){
     df <- df[which(!is.na(df$match)),]
   }
