@@ -136,7 +136,6 @@ filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names,
           }
         }
       }
-
       rows <-which(DB$data[[FORM]][[filter_field_final]]%in%filter_choices_final)
       cols <- colnames(DF)[which(colnames(DF)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
       if(length(rows)>0&&length(cols)>0)selected[[FORM]] <- DF[rows,cols]
