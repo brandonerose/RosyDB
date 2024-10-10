@@ -298,7 +298,9 @@ run_fields_transformation <- function(DB,ask = T){
         }
       }
     }
-    DB$data[[form_name]][[field_name]] <- OUT
+    if (form_name %in% names(DB$data)) {
+      DB$data[[form_name]][[field_name]] <- OUT
+    }
   }
   bullet_in_console(paste0("Added new fields to ",DB$short_name," `DB$data`"),bullet_type = "v")
   return(DB)
