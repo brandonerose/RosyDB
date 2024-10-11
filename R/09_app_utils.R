@@ -4,13 +4,13 @@
 #' @inheritParams save_DB
 #' @export
 sidebar_choices <- function(DB,n_threshold=1){
-  choices <- DB$metadata$choices
+  choices <- annotate_choices(DB)
   choices <- choices[which(choices$n>=n_threshold),]
   sbc <- data.frame(
     form_name = choices$form_name,
     field_name = choices$field_name,
-    name = choices$name
-    # label2 = paste0(choices$form_name," - ",choices$field_label," - ",choices$name, " (n = ",clean_num(choices$n),")")
+    name = choices$name,
+    label = paste0(choices$label, " (n = ",clean_num(choices$n),")")
   )
   return(sbc)
 }
