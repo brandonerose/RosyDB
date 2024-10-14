@@ -10,14 +10,14 @@ fields_to_choices <- function(fields){
   for(i in 1:nrow(fields)){
     field_name <- fields$field_name[i]
     form_name <- fields$form_name[i]
-    form_label <- fields$form_label[i]
+    # form_label <- fields$form_label[i]
     field_label <- fields$field_label[i]
     field_type <- fields$field_type[i]
     selections <- fields$select_choices_or_calculations[i] %>% split_choices()
     choices <- choices %>% dplyr::bind_rows(
       data.frame(
         form_name = form_name,
-        form_label = form_label,
+        # form_label = form_label,
         field_name = field_name,
         field_type = field_type,
         field_label =  ifelse(!is.na(field_label),field_label,field_name),
@@ -27,7 +27,7 @@ fields_to_choices <- function(fields){
     )
   }
   choices$label <- paste(choices$form_name,"-",choices$field_label,"-",choices$name)
-  choices$label2 <- paste(choices$form_label,"-",choices$field_label,"-",choices$name)
+  # choices$label2 <- paste(choices$form_label,"-",choices$field_label,"-",choices$name)
   rownames(choices) <- NULL
   return(choices)
 }
