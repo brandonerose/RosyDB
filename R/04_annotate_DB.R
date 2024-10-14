@@ -10,12 +10,14 @@ fields_to_choices <- function(fields){
   for(i in 1:nrow(fields)){
     field_name <- fields$field_name[i]
     form_name <- fields$form_name[i]
+    form_label <- fields$form_label[i]
     field_label <- fields$field_label[i]
     field_type <- fields$field_type[i]
     selections <- fields$select_choices_or_calculations[i] %>% split_choices()
     choices <- choices %>% dplyr::bind_rows(
       data.frame(
         form_name = form_name,
+        form_label = form_label,
         field_name = field_name,
         field_type = field_type,
         field_label =  ifelse(!is.na(field_label),field_label,field_name),
@@ -25,11 +27,12 @@ fields_to_choices <- function(fields){
     )
   }
   choices$label <- paste(choices$form_name,"-",choices$field_label,"-",choices$name)
+  choices$label2 <- paste(choices$form_label,"-",choices$field_label,"-",choices$name)
   rownames(choices) <- NULL
   return(choices)
 }
 #' @export
-annotate_fields <- function(DB,skim= T){
+annotate_fields <- function(DB,summarize_data = T){
   fields <- DB$metadata$fields#[,colnames(get_original_fields(DB))]
   fields <- fields[which(fields$field_type!="descriptive"),]
   fields <- fields[which(fields$field_type!="checkbox"),]
@@ -53,7 +56,7 @@ annotate_fields <- function(DB,skim= T){
   if(!"units" %in% colnames(fields))fields$units <- NA
   if(!"field_label_short" %in% colnames(fields)) fields$field_label_short <- fields$field_label
   # if(!"field_label_short" %in% colnames(fields))fields$ <- fields$field_label
-  if(skim){
+  if(summarize_data){
     skimmed <- NULL
     for (form in unique(fields$form_name)){
       COLS <- fields$field_name[which(fields$form_name==form)]
@@ -72,19 +75,22 @@ annotate_fields <- function(DB,skim= T){
   return(fields)
 }
 #' @export
-annotate_forms <- function(DB){
+annotate_forms <- function(DB,summarize_data = T){
   forms <- DB$metadata$forms
-  for(status in c("Incomplete","Unverified","Complete")){
-    forms[[tolower(status)]] <- forms$form_name %>% sapply(function(form_name){
-      form_name %>% strsplit(" [:|:] ") %>% unlist() %>% sapply(function(form_name){
-        (DB$data[[form_name]][[paste0(form_name,"_complete")]]==status) %>% which() %>% length()
-      }) %>% paste0(collapse = " | ")
-    })
+  #add metadata info like n fields
+  if(summarize_data){
+    for(status in c("Incomplete","Unverified","Complete")){
+      forms[[tolower(status)]] <- forms$form_name %>% sapply(function(form_name){
+        form_name %>% strsplit(" [:|:] ") %>% unlist() %>% sapply(function(form_name){
+          (DB$data[[form_name]][[paste0(form_name,"_complete")]]==status) %>% which() %>% length()
+        }) %>% paste0(collapse = " | ")
+      })
+    }
   }
   return(forms)
 }
 #' @export
-annotate_choices <- function(DB){
+annotate_choices <- function(DB,summarize_data = T){
   forms <- DB$metadata$forms
   fields <- DB$metadata$fields
   choices <- DB$metadata$choices
@@ -97,23 +103,25 @@ annotate_choices <- function(DB){
   #   sapply(function(X){
   #     DB$metadata$fields$field_label[which(fields$field_name==X)] %>% unique()
   #   })
-  choices$n <- 1:nrow(choices) %>% lapply(function(i){
-    DF <- DB$data[[choices$form_name[i]]]
-    if(is.null(DF))return(0)
-    if(nrow(DF)==0)return(0)
-    sum(DF[,choices$field_name[i]]==choices$name[i],na.rm = T)
-    # print(i)
-  }) %>% unlist()
-  choices$n_total <- 1:nrow(choices) %>% lapply(function(i){
-    DF <- DB$data[[choices$form_name[i]]]
-    if(is.null(DF))return(0)
-    if(nrow(DF)==0)return(0)
-    sum(!is.na(DF[,choices$field_name[i]]),na.rm = T)
-  }) %>% unlist()
-  choices$perc <-  (choices$n/choices$n_total) %>% round(4)
-  choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
-  # DB$summary$choices <- choices
-  # bullet_in_console("Annotated `DB$summary$choices`",bullet_type = "v")
+  if(summarize_data){
+    choices$n <- 1:nrow(choices) %>% lapply(function(i){
+      DF <- DB$data[[choices$form_name[i]]]
+      if(is.null(DF))return(0)
+      if(nrow(DF)==0)return(0)
+      sum(DF[,choices$field_name[i]]==choices$name[i],na.rm = T)
+      # print(i)
+    }) %>% unlist()
+    choices$n_total <- 1:nrow(choices) %>% lapply(function(i){
+      DF <- DB$data[[choices$form_name[i]]]
+      if(is.null(DF))return(0)
+      if(nrow(DF)==0)return(0)
+      sum(!is.na(DF[,choices$field_name[i]]),na.rm = T)
+    }) %>% unlist()
+    choices$perc <-  (choices$n/choices$n_total) %>% round(4)
+    choices$perc_text <- choices$perc %>% magrittr::multiply_by(100) %>% round(1) %>% paste0("%")
+    # DB$summary$choices <- choices
+    # bullet_in_console("Annotated `DB$summary$choices`",bullet_type = "v")
+  }
   return(choices)
 }
 #' @title fields_with_no_data
