@@ -18,7 +18,6 @@ Imports:
     openxlsx,
     rmarkdown,
     RosyApp,
-    RosyREDCap,
     RosyUtils,
     rstudioapi,
     shiny,

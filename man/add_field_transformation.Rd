@@ -15,7 +15,7 @@ add_field_transformation(
   field_note = NA,
   identifier = "",
   units = NA,
-  data_func = NULL
+  data_func = NA
 )
 }
 \description{

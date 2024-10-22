@@ -88,7 +88,7 @@ save_projects_to_cache <- function(projects,silent=T){
     )
     bullet_in_console(
       text = paste0("The cache is stored in directory on your computer. It can be found with `",pkg_name,"::cache_path()`, and cleared with `",pkg_name,"::cache_clear()`."),
-      file = RosyREDCap:::cache_path()
+      file = cache_path()
     )
   }
 }

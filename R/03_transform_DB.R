@@ -174,7 +174,7 @@ add_field_transformation <- function(
     field_note = NA,
     identifier = "",
     units = NA,
-    data_func = NULL
+    data_func = NA
 ) {
   DB <-validate_DB(DB)
   if(wl(DB$transformation$fields$field_name==field_name)>0){
@@ -193,8 +193,8 @@ add_field_transformation <- function(
     if(is.na(field_note))field_note <- original_fields_row$field_note
     if(identifier=="")identifier <- original_fields_row$identifier
   }
-  if(is.null(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
-  if(!is.null(data_func)){
+  if(is.na(data_func))warning("if no `data_func` is provided, the column is only added to the metadata",immediate. = T)
+  if(!is.null(is.na)){
     func_template <- "data_func = function(DB,field_name){YOUR FUNCTION}"
     if(!is.function(data_func))stop("`data_func` must be a function ... ",func_template)
     allowed_args <- c("DB","field_name","form_name")
@@ -213,7 +213,7 @@ add_field_transformation <- function(
     units = units,
     in_original_redcap = in_original_redcap,
     field_label_short = field_label,
-    field_func = data_func %>% function_to_string()
+    field_func = data_func
   )
   DB$transformation$fields <- DB$transformation$fields %>% dplyr::bind_rows(field_row)
   message("added '",field_name,"' column")
@@ -274,10 +274,9 @@ run_fields_transformation <- function(DB,ask = T){
     OUT <- NA
     row_of_interest <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- row_of_interest$form_name
-    if(row_of_interest$field_func!="NULL"){
+    if(is_something(row_of_interest$field_func)){
       if(form_name %in% names(DB$data)){
-        restored_func <- eval(parse(text = row_of_interest$field_func))
-        OUT <- restored_func(DB = DB, field_name = field_name,form_name = form_name)
+        OUT <- row_of_interest$field_func(DB = DB, field_name = field_name,form_name = form_name)
       }
     }
     if(field_name %in% the_names_existing){
