@@ -23,6 +23,7 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
     transformation = list(
       forms = NULL,
       fields = NULL,
+      field_functions = NULL,
       original_forms = NULL,
       original_fields = NULL,
       data_updates = NULL

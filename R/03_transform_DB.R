@@ -73,6 +73,7 @@ default_fields_transformation <- function(DB){
   DB$transformation <- list(
     forms = NULL,
     fields = NULL,
+    field_functions = NULL,
     original_forms = NULL,
     original_fields = NULL,
     data_updates = NULL
@@ -213,9 +214,10 @@ add_field_transformation <- function(
     units = units,
     in_original_redcap = in_original_redcap,
     field_label_short = field_label,
-    field_func = data_func
+    field_func = data_func %>% function_to_string()
   )
   DB$transformation$fields <- DB$transformation$fields %>% dplyr::bind_rows(field_row)
+  DB$transformation$field_functions[[field_name]] <- data_func
   message("added '",field_name,"' column")
   return(DB)
 }
@@ -274,9 +276,10 @@ run_fields_transformation <- function(DB,ask = T){
     OUT <- NA
     row_of_interest <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- row_of_interest$form_name
-    if(is_something(row_of_interest$field_func)){
+    field_func <- DB$transformation$field_functions[[field_name]]
+    if(is_something(field_func)){
       if(form_name %in% names(DB$data)){
-        OUT <- row_of_interest$field_func(DB = DB, field_name = field_name,form_name = form_name)
+        OUT <- field_func(DB = DB, field_name = field_name,form_name = form_name)
       }
     }
     if(field_name %in% the_names_existing){
