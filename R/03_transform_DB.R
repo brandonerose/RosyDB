@@ -70,14 +70,13 @@ default_forms_transformation <- function(DB){
 #' @title default_forms_transformation
 #' @export
 default_fields_transformation <- function(DB){
-  DB$transformation <- list(
-    forms = NULL,
-    fields = NULL,
-    field_functions = NULL,
-    original_forms = NULL,
-    original_fields = NULL,
-    data_updates = NULL
-  )
+  # DB$transformation <- list(
+  #   forms = NULL,
+  #   fields = NULL,
+  #   # original_forms = NULL,
+  #   # original_fields = NULL,
+  #   data_updates = NULL
+  # )
   fields_transformation <- NULL
   DB$metadata$form_key_cols %>% names() %>% lapply(function(form_name){
     DB$metadata$form_key_cols[[form_name]]
@@ -128,8 +127,7 @@ default_fields_transformation <- function(DB){
       }
     )
   }
-  fields_transformation <- DB$transformation$fields
-  return(fields_transformation)
+  return(DB)
 }
 #' @title add_forms_transformation
 #' @export
