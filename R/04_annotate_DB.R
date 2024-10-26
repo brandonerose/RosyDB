@@ -31,10 +31,19 @@ fields_to_choices <- function(fields){
   rownames(choices) <- NULL
   return(choices)
 }
+add_labels_to_checkbox <- function (fields){
+  rows <- which(fields$field_type=="checkbox_choice")
+  x <- fields$field_name[rows] %>% strsplit("___") %>% sapply(function(x){x[[1]]})
+  y <- fields$field_label[rows]
+  z <- paste0(fields$field_label[match(x,fields$field_name)]," - ",y)
+  fields$field_label[rows] <- z
+  return(fields)
+}
 #' @export
 annotate_fields <- function(DB,summarize_data = T){
   fields <- DB$metadata$fields#[,colnames(get_original_fields(DB))]
   fields <- fields[which(fields$field_type!="descriptive"),]
+  fields <- add_labels_to_checkbox(fields)
   fields <- fields[which(fields$field_type!="checkbox"),]
   fields$field_label[which(is.na(fields$field_label))] <- fields$field_name[which(is.na(fields$field_label))]
   fields  <- unique(fields$form_name) %>%
