@@ -144,6 +144,9 @@ add_forms_transformation <- function(DB,forms_transformation,ask=T){
     "by.y",
     "x_first"
   )
+  if(DB$redcap$is_longitudinal){
+    forms_tranformation_cols <- forms_tranformation_cols %>% append("forms_tranformation_cols")
+  }
   if(any(!names(forms_transformation)%in%forms_tranformation_cols)){
     bullet_in_console("Use `default_forms_transformation(DB)` is an example!")
     stop("forms_transformation needs the following colnames... ", forms_tranformation_cols %>% as_comma_string())
