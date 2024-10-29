@@ -195,9 +195,22 @@ fields_with_no_data <- function(DB){
 #' @export
 clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
   # DB <-  DB %>% annotate_fields(skim = F)
+  if(DB$internals$is_clean){
+    bullet_in_console("Already Clean",bullet_type = "v")
+    return(DB)
+  }
   for(FORM in names(DB$data)){
     DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(fields=DB$metadata$fields,drop_blanks= drop_blanks,drop_unknowns=drop_unknowns)
   }
+  DB$internals$is_clean <- T
+  return(DB)
+}
+#' @title reverse_clean_DB
+#' @export
+reverse_clean_DB <- function(DB){
+  DB$data <- all_character_cols_list(DB$data)
+  DB$data_update <-DB$data_update %>% all_character_cols_list()
+  DB$internals$is_clean <- F
   return(DB)
 }
 #' @title clean_DF

@@ -92,12 +92,6 @@ stripped_DB <- function (DB) {
   DB$data_update <- list()
   return(DB)
 }
-all_DB_to_char_cols <- function(DB){
-  DB$data <-DB$data %>% all_character_cols_list()
-  DB$data <-DB$data %>% all_character_cols_list()
-  DB$data_update <-DB$data_update %>% all_character_cols_list()
-  return(DB)
-}
 #' @title Select REDCap records from DB
 #' @param field_names character vector of field_names to be included
 #' @param form_names character vector of form_names to be included

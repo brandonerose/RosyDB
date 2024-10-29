@@ -47,6 +47,7 @@ blank_DB <-  function(){ # can sort this better in version 3.0.0
       merge_form_name = "merged",
       DB_type = "default",
       is_transformed = F,
+      is_clean = F,
       use_csv = F
     ),
     links = list(
@@ -125,7 +126,7 @@ setup_DB <- function(short_name,dir_path,validate = T,use_csv = F){
   DB$short_name <- validate_env_name(short_name)
   if(validate)DB <- validate_DB(DB)
   DB$internals$use_csv <- use_csv
-  DB$data <- DB$data %>% all_character_cols_list()
+  DB <- reverse_clean_DB(DB)
   return(DB)
 }
 #' @title Reads DB from the directory
@@ -152,7 +153,7 @@ save_DB <- function(DB){
   if( ! is.list(DB)) stop("DB must be a list")
   #function
   DB <- DB %>% validate_DB()
-  DB$data <- DB$data %>% all_character_cols_list()
+  DB <- reverse_clean_DB(DB)
   DB %>% saveRDS(file=file.path(DB$dir_path,"R_objects",paste0(DB$short_name,".rdata")))
   add_project(DB)
   # save_xls_wrapper(DB)
