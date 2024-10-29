@@ -278,11 +278,14 @@ run_fields_transformation <- function(DB,ask = T){
     row_of_interest <- DB$transformation$fields[which(DB$transformation$fields$field_name==field_name),]
     form_name <- row_of_interest$form_name
     field_func <- DB$transformation$field_functions[[field_name]]
+    environment(field_func) <- environment()
     if(is_something(field_func)){
       if(form_name %in% names(DB$data)){
         OUT <- field_func(DB = DB, field_name = field_name,form_name = form_name)
       }
     }
+    my_vars <- list(DB = DB, field_name = field_name, form_name = form_name)
+    OUT <- do.call(field_func, my_vars)
     if(field_name %in% the_names_existing){
       OLD <- DB$data[[form_name]][[field_name]]
       if(!identical(OUT,OLD)){
