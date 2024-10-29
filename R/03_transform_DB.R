@@ -218,7 +218,7 @@ add_field_transformation <- function(
     field_func = data_func %>% function_to_string()
   )
   DB$transformation$fields <- DB$transformation$fields %>% dplyr::bind_rows(field_row)
-  DB$transformation$field_functions[[field_name]] <- data_func
+  DB$transformation$field_functions[[field_name]] <- data_func %>% clean_function()
   message("added '",field_name,"' column")
   return(DB)
 }
