@@ -83,20 +83,20 @@ read_DB_from_dir <- function(DB,allow_all=T,drop_non_form_vars=T,stop_or_warn="w
   path <- file.path(get_dir(DB),DB$short_name,"upload")
   if(!file.exists(path))stop("No files found at path --> ",path)
   x <- list.files.real(path)
-  df <- data.frame(
+  DF <- data.frame(
     file_name = x,
     file_name_no_ext = gsub("\\.xlsx|\\.xls","",x),
     match = NA
   )
-  df$match <- strsplit(df$file_name_no_ext,"_") %>% sapply(function(IN){IN[length(IN)]})
-  df$match[which(!df$match%in%c(DB$internals$merge_form_name,DB$metadata$forms$form_name))] <- NA
+  DF$match <- strsplit(DF$file_name_no_ext,"_") %>% sapply(function(IN){IN[length(IN)]})
+  DF$match[which(!DF$match%in%c(DB$internals$merge_form_name,DB$metadata$forms$form_name))] <- NA
   if(!allow_all){
-    df <- df[which(!is.na(df$match)),]
+    DF <- DF[which(!is.na(DF$match)),]
   }
   if(DB$data_update %>% is_something())stop("Already files in DB$data_update, clear that first")
   DB[["data_update"]] <- list()
-  # for(i in 1:nrow(df)){#not done yet
-  #   the_file <- readxl::read_xlsx(file.path(path,df$file_name[i]),col_types = "text") %>% all_character_cols() # would
+  # for(i in 1:nrow(DF)){#not done yet
+  #   the_file <- readxl::read_xlsx(file.path(path,DF$file_name[i]),col_types = "text") %>% all_character_cols() # would
   #   drop_cols <- NULL
   #   if(drop_nonredcap_vars){
   #     x <- colnames(the_file)[which(!colnames(the_file)%in%c(DB$redcap$raw_structure_cols,DB$redcap$metadata$field_name))]
@@ -105,20 +105,20 @@ read_DB_from_dir <- function(DB,allow_all=T,drop_non_form_vars=T,stop_or_warn="w
   #       unique()
   #   }
   #   if(drop_non_form_vars){
-  #     form <- df$match[i]
+  #     form <- DF$match[i]
   #     if(form == DB$internals$merge_form_name)form <- DB$redcap$forms$form_name[which(!DB$redcap$forms$repeating)]
   #     x<-colnames(the_file)[which(!colnames(the_file)%in%c(DB$redcap$raw_structure_cols,DB$redcap$metadata$field_name[which(DB$redcap$metadata$form_name%in%form)]))]
   #     redcapols<-drop_cols %>%
   #       append(x) %>%
   #       unique()
   #   }
-  #   message1 <- paste0("forbidden cols name: ",df$file_name[i],"; ",x %>% paste0(collapse = ", "))
+  #   message1 <- paste0("forbidden cols name: ",DF$file_name[i],"; ",x %>% paste0(collapse = ", "))
   #   if(length(x)>0){
   #     if(stop_or_warn=="stop") stop(message1)
   #     if(stop_or_warn=="warn") warning(message1,immediate. = T)
   #   }
   #   the_file <- the_file[,which(!colnames(the_file)%in%drop_cols)]
-  #   DB[["data_update"]][[df$match[i]]] <- the_file
+  #   DB[["data_update"]][[DF$match[i]]] <- the_file
   # }
   DB
 }
