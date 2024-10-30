@@ -266,6 +266,8 @@ labelled_to_raw_DB <- function(DB){
   DB$internals$data_extract_labelled <- F
   DB
 }
+#' @title DF_list_to_text
+#' @export
 DF_list_to_text <- function(DF_list, DB,drop_nas = T){
   output_list <- c()
   for (i in seq_along(DF_list)) {
