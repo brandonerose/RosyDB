@@ -193,14 +193,14 @@ fields_with_no_data <- function(DB){
 #' @param drop_unknowns logical for dropping missing codes
 #' @return DB object cleaned for table or plots
 #' @export
-clean_DB <- function(DB,drop_blanks=F,drop_unknowns=F){
+clean_DB <- function(DB,drop_blanks=F,other_drops=NULL){
   # DB <-  DB %>% annotate_fields(skim = F)
   if(DB$internals$is_clean){
     bullet_in_console("Already Clean",bullet_type = "v")
     return(DB)
   }
   for(FORM in names(DB$data)){
-    DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(fields=DB$metadata$fields,drop_blanks= drop_blanks,drop_unknowns=drop_unknowns)
+    DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(fields=DB$metadata$fields,drop_blanks= drop_blanks,other_drops=other_drops)
   }
   DB$internals$is_clean <- T
   return(DB)
@@ -215,7 +215,7 @@ reverse_clean_DB <- function(DB){
 }
 #' @title clean_DF
 #' @export
-clean_DF <- function(DF,fields,drop_blanks = T,drop_unknowns = T){
+clean_DF <- function(DF,fields,drop_blanks = T,other_drops = NULL){
   for(COLUMN in colnames(DF)){
     if(COLUMN %in% fields$field_name){
       ROW <- which(fields$field_name==COLUMN)
@@ -242,8 +242,8 @@ clean_DF <- function(DF,fields,drop_blanks = T,drop_unknowns = T){
           if(drop_blanks){
             levels <- levels[which(levels%in%unique(DF[[COLUMN]]))]
           }
-          if(!drop_unknowns){
-            levels <- levels %>% append(unique(DF[[COLUMN]])) %>% unique() %>% drop_nas()
+          if(!is.null(other_drops)){
+            levels <- levels[which(!levels%in%other_drops)]
           }
         }
         if(class == "integer"){

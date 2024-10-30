@@ -4,7 +4,7 @@
 \alias{clean_DB}
 \title{clean DB columns for plotting using the metadata}
 \usage{
-clean_DB(DB, drop_blanks = F, drop_unknowns = F)
+clean_DB(DB, drop_blanks = F, other_drops = NULL)
 }
 \arguments{
 \item{drop_blanks}{logical for dropping n=0 choices}

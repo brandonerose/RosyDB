@@ -4,7 +4,7 @@
 \alias{clean_DF}
 \title{clean_DF}
 \usage{
-clean_DF(DF, fields, drop_blanks = T, drop_unknowns = T)
+clean_DF(DF, fields, drop_blanks = T, other_drops = NULL)
 }
 \description{
 clean_DF
