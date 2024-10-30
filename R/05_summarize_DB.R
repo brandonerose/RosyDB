@@ -268,12 +268,13 @@ labelled_to_raw_DB <- function(DB){
 }
 #' @title DF_list_to_text
 #' @export
-DF_list_to_text <- function(DF_list, DB,drop_nas = T){
+DF_list_to_text <- function(DF_list, DB,drop_nas = T,clean_names= T){
   output_list <- c()
   for (i in seq_along(DF_list)) {
     DF <- DF_list[[i]]
     the_raw_name <- names(DF_list)[[i]]
-    the_name <- DB$metadata$forms$form_label[which(DB$metadata$forms$form_name==the_raw_name)]
+    the_name <- the_raw_name
+    if(clean_names)the_name <- DB$metadata$forms$form_label[which(DB$metadata$forms$form_name==the_raw_name)]
     df_name <- paste0("----- ",the_name, " Table -----")
     output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", df_name, "</strong><br>"))
     key_col_names <- DB$metadata$form_key_cols[[the_raw_name]]
@@ -282,7 +283,9 @@ DF_list_to_text <- function(DF_list, DB,drop_nas = T){
         entry <- DF[j, col_name]
         if (!col_name %in% key_col_names) {
           if(!is.na(entry)|!drop_nas){
-            output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name, ":</strong> ", entry,"<br>"))
+            col_name_clean <- col_name
+            if(clean_names)col_name_clean <- DB$metadata$fields$field_label[which(DB$metadata$fields$field_name==col_name)]
+            output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name_clean, ":</strong> <br>&nbsp;&nbsp;&nbsp;&nbsp;", entry,"<br>"))
           }
         }
       }

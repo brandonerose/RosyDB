@@ -4,7 +4,7 @@
 \alias{DF_list_to_text}
 \title{DF_list_to_text}
 \usage{
-DF_list_to_text(DF_list, DB, drop_nas = T)
+DF_list_to_text(DF_list, DB, drop_nas = T, clean_names = T)
 }
 \description{
 DF_list_to_text
