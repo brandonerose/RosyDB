@@ -66,9 +66,9 @@ form_names_to_field_names <- function(form_names,DB){
   return(unique(field_names))
 }
 #' @export
-construct_header_list <- function(df_list,md_elements = c("form_name","field_type","field_label"),fields){
+construct_header_list <- function(DF_list,md_elements = c("form_name","field_type","field_label"),fields){
   if(anyDuplicated(fields$field_name)>0)stop("dup names not allowed in fields")
-  df_col_list <- df_list %>% lapply(colnames)
+  df_col_list <- DF_list %>% lapply(colnames)
   header_df_list <- df_col_list %>% lapply(function(field_names){
     x<- field_names%>% lapply(function(field_name){
       row <- which(fields$field_name==field_name)
@@ -265,4 +265,33 @@ labelled_to_raw_DB <- function(DB){
   }
   DB$internals$data_extract_labelled <- F
   DB
+}
+DF_list_to_text <- function(DF_list, DB){
+  for (i in seq_along(DF_list)) {
+    DF <- DF_list[[i]]
+    # Get the name of the data frame (e.g., DataFrame 1)
+    df_name <- paste("DataFrame", i, ":")
+    # Append the table name to the output list
+    output_list <- c(output_list, df_name)
+    # Loop through each row of the data frame
+    for (j in 1:nrow(DF)) {
+      # Loop through each column and its entry for the current row
+      for (col_name in colnames(DF)) {
+        entry <- DF[j, col_name]
+        # Check if the column is a key column
+        if (col_name %in% key_columns[[i]]) {
+          # Format key columns differently (e.g., bold)
+          output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name, ":</strong> ", entry))
+        } else {
+          # Format non-key columns normally
+          output_list <- c(output_list, paste0("&nbsp;&nbsp;", col_name, ": ", entry))
+        }
+      }
+      # Add a line break after each row
+      output_list <- c(output_list, "<br/>")
+    }
+    # Add a line break after each data frame for separation
+    output_list <- c(output_list, "<br/>")
+  }
+  return(output_list)
 }
