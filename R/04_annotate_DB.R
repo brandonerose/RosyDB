@@ -87,16 +87,16 @@ annotate_fields <- function(DB,summarize_data = T){
 annotate_forms <- function(DB,summarize_data = T){
   forms <- DB$metadata$forms
   # forms <- get_original_forms(DB)
-  if(!is.null(DB$metadata$form_key_cols)){
-    forms$key_cols <- forms$form_name %>% sapply(function(IN){
-      DB$metadata$form_key_cols[[IN]] %>% paste0(collapse = "+")
-    })
-    forms$key_names <- forms$form_name %>% sapply(function(IN){
-      row_match <- which(forms$form_name==IN)
-      if(!forms$repeating[row_match])return(DB$metadata$form_key_cols[[IN]])
-      return(paste0(forms$form_name[row_match],"_key"))
-    })
-  }
+  # if(!is.null(DB$metadata$form_key_cols)){
+  #   forms$key_cols <- forms$form_name %>% sapply(function(IN){
+  #     DB$metadata$form_key_cols[[IN]] %>% paste0(collapse = "+")
+  #   })
+  #   forms$key_names <- forms$form_name %>% sapply(function(IN){
+  #     row_match <- which(forms$form_name==IN)
+  #     if(!forms$repeating[row_match])return(DB$metadata$form_key_cols[[IN]])
+  #     return(paste0(forms$form_name[row_match],"_key"))
+  #   })
+  # }
   #add metadata info like n fields
   if(summarize_data){
     for(status in c("Incomplete","Unverified","Complete")){

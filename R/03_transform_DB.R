@@ -420,7 +420,7 @@ transform_DB <- function(DB,ask = T){
   # forms ---------
   DB$transformation$original_forms <- DB$metadata$forms
   #new function RosyUtils
-  cols_to_keep <- c("form_name_remap","form_label_remap","repeating","repeating_via_events")
+  cols_to_keep <- c("form_name_remap","form_label_remap","repeating","repeating_via_events","key_cols","key_names")
   cols_to_keep <- cols_to_keep[which(cols_to_keep%in% colnames(forms_transformation))]
   DB$metadata$forms <- forms_transformation[,cols_to_keep] %>% unique()
   colnames(DB$metadata$forms)[which(colnames(DB$metadata$forms)=="form_name_remap")] <-"form_name"
