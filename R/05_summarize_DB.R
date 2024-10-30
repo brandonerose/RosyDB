@@ -266,31 +266,28 @@ labelled_to_raw_DB <- function(DB){
   DB$internals$data_extract_labelled <- F
   DB
 }
-DF_list_to_text <- function(DF_list, DB){
+DF_list_to_text <- function(DF_list, DB,drop_nas = T){
+  output_list <- c()
   for (i in seq_along(DF_list)) {
     DF <- DF_list[[i]]
-    # Get the name of the data frame (e.g., DataFrame 1)
-    df_name <- paste("DataFrame", i, ":")
-    # Append the table name to the output list
-    output_list <- c(output_list, df_name)
-    # Loop through each row of the data frame
+    the_raw_name <- names(DF_list)[[i]]
+    the_name <- DB$metadata$forms$form_label[which(DB$metadata$forms$form_name==the_raw_name)]
+    df_name <- paste0("----- ",the_name, " Table -----")
+    output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", df_name, ":</strong> "))
+    key_col_names <- DB$metadata$form_key_cols[[the_raw_name]]
     for (j in 1:nrow(DF)) {
-      # Loop through each column and its entry for the current row
       for (col_name in colnames(DF)) {
         entry <- DF[j, col_name]
-        # Check if the column is a key column
-        if (col_name %in% key_columns[[i]]) {
-          # Format key columns differently (e.g., bold)
+        if (col_name %in% key_col_names) {
           output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name, ":</strong> ", entry))
         } else {
-          # Format non-key columns normally
-          output_list <- c(output_list, paste0("&nbsp;&nbsp;", col_name, ": ", entry))
+          if(!is.na(entry)|!drop_nas){
+            output_list <- c(output_list, paste0("&nbsp;&nbsp;", col_name, ": ", entry))
+          }
         }
       }
-      # Add a line break after each row
       output_list <- c(output_list, "<br/>")
     }
-    # Add a line break after each data frame for separation
     output_list <- c(output_list, "<br/>")
   }
   return(output_list)
