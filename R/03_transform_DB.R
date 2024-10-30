@@ -404,7 +404,7 @@ transform_DB <- function(DB,ask = T){
   }
   if(any(!names(OUT)%in%unique(forms_transformation$form_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
-  DB$metadata$forms <- annotate_forms(DB,summarize_data = F)
+  forms_transformation <- annotate_forms(DB,summarize_data = F)
   DB$internals$is_transformed <- T
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   # forms ---------
