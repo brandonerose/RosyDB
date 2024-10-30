@@ -189,7 +189,10 @@ add_field_transformation <- function(
   if(in_original_redcap){
     original_fields_row <- fields[which(fields$field_name==field_name),]
     if(missing(form_name))form_name <- original_fields_row$form_name
-    if(missing(field_type))field_type <- original_fields_row$field_type
+    if(missing(field_type)){
+      field_type <- original_fields_row$field_type
+      field_type_R <- original_fields_row$field_type_R
+    }
     if(is.na(field_label))field_label <- original_fields_row$field_label
     if(is.na(select_choices_or_calculations))select_choices_or_calculations <- original_fields_row$select_choices_or_calculations
     if(is.na(field_note))field_note <- original_fields_row$field_note
