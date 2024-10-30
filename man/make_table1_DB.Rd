@@ -4,7 +4,7 @@
 \alias{make_table1_DB}
 \title{make_table1}
 \usage{
-make_table1_DB(DB, df, group = "no_choice", variables, render.missing = F)
+make_table1_DB(DB, DF, group = "no_choice", variables, render.missing = F)
 }
 \arguments{
 \item{DB}{object generated using `load_DB()` or `setup_DB()`}
