@@ -404,7 +404,17 @@ transform_DB <- function(DB,ask = T){
   }
   if(any(!names(OUT)%in%unique(forms_transformation$form_name_remap)))stop("not all names in OUT objext. Something wrong with transform_DB()")
   DB$data <- OUT
-  forms_transformation <- annotate_forms(DB,summarize_data = F)
+  # forms_transformation <- annotate_forms(DB,summarize_data = F)
+  if(!is.null(DB$metadata$form_key_cols)){
+    forms_transformation$key_cols <- forms_transformation$form_name %>% sapply(function(IN){
+      DB$metadata$form_key_cols[[IN]] %>% paste0(collapse = "+")
+    })
+    forms_transformation$key_names <- forms_transformation$form_name %>% sapply(function(IN){
+      row_match <- which(forms_transformation$form_name==IN)
+      if(!forms_transformation$repeating[row_match])return(DB$metadata$form_key_cols[[IN]])
+      return(paste0(forms_transformation$form_name[row_match],"_key"))
+    })
+  }
   DB$internals$is_transformed <- T
   bullet_in_console(paste0(DB$short_name," transformed according to `DB$transformation`"),bullet_type = "v")
   # forms ---------
