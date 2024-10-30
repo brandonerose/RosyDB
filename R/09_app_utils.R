@@ -18,8 +18,8 @@ sidebar_choices <- function(DB,n_threshold=1){
 #' @inheritParams save_DB
 #' @return messages for confirmation
 #' @export
-make_table1_DB<-function(DB,df,group="no_choice",variables ,render.missing = F){
-  variables<-variables[variables%in%colnames(df)]
+make_table1_DB<-function(DB,DF,group="no_choice",variables ,render.missing = F){
+  variables<-variables[variables%in%colnames(DF)]
   # if(any(!x))warning(paste0(x,collapse = ", ")," <- not in the form you specified")
   if(length(variables)==0)stop("Provide variable names of at least length 1!")
   forumla <- paste0(variables, collapse = " + ")
@@ -27,16 +27,16 @@ make_table1_DB<-function(DB,df,group="no_choice",variables ,render.missing = F){
   # footnote <- "ᵃ Also known as Breslow thickness"
   if(group!="no_choice"){
     x<- DB$metadata$field_label[which(DB$metadata$field_name==group)]
-    df$group <-  df[[group]] %>% factor()
-    df <- df[which(!is.na(df$group)),]
-    table1::label(df$group)       <- ifelse(is.na(x),group,x)
+    DF$group <-  DF[[group]] %>% factor()
+    DF <- DF[which(!is.na(DF$group)),]
+    table1::label(DF$group)       <- ifelse(is.na(x),group,x)
     forumla <- paste0(forumla, " | group")
   }
   forumla <- as.formula(paste0("~",forumla))
   if(render.missing){
-    table1::table1(forumla,data=df,render.missing=NULL)
+    table1::table1(forumla,data=DF,render.missing=NULL)
   }else{
-    table1::table1(forumla,data=df)
+    table1::table1(forumla,data=DF)
   }
 }
 #' @title Run Quality Checks
