@@ -274,23 +274,23 @@ DF_list_to_text <- function(DF_list, DB,drop_nas = T){
     DF <- DF_list[[i]]
     the_raw_name <- names(DF_list)[[i]]
     the_name <- DB$metadata$forms$form_label[which(DB$metadata$forms$form_name==the_raw_name)]
-    df_name <- paste0("----- ",the_name, " Table -----")
-    output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", df_name, ":</strong> "))
+    df_name <- paste0("----- ",the_name, " Table -----<br>")
+    output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", df_name, ":</strong><br>"))
     key_col_names <- DB$metadata$form_key_cols[[the_raw_name]]
     for (j in 1:nrow(DF)) {
       for (col_name in colnames(DF)) {
         entry <- DF[j, col_name]
         if (col_name %in% key_col_names) {
-          output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name, ":</strong> ", entry))
+          output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name, ":</strong> ", entry,"<br>"))
         } else {
           if(!is.na(entry)|!drop_nas){
-            output_list <- c(output_list, paste0("&nbsp;&nbsp;", col_name, ": ", entry))
+            output_list <- c(output_list, paste0("&nbsp;&nbsp;", col_name, ": ", entry,"<br>"))
           }
         }
       }
-      output_list <- c(output_list, "<br/>")
+      # output_list <- c(output_list, "<br>")
     }
-    output_list <- c(output_list, "<br/>")
+    output_list <- c(output_list, "<br>")
   }
   return(output_list)
 }
