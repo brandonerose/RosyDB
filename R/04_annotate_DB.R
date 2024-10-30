@@ -195,6 +195,8 @@ fields_with_no_data <- function(DB){
 #' @export
 clean_DB <- function(DB,drop_blanks=F,other_drops=NULL){
   # DB <-  DB %>% annotate_fields(skim = F)
+  if(!is_something(DB))return(DB)
+  if(!is_something(DB$data))return(DB)
   if(DB$internals$is_clean){
     bullet_in_console("Already Clean",bullet_type = "v")
     return(DB)
