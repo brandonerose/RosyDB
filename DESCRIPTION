@@ -23,7 +23,6 @@ Imports:
     shiny,
     skimr,
     stringr,
-    table1,
     utils
 Remotes: 
     github::brandonerose/RosyApp,
