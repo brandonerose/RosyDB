@@ -77,6 +77,18 @@ form_names_to_form_labels <- function(form_names,DB){
     ]
   )
 }
+#' @title form_names_to_form_labels
+#' @export
+form_labels_to_form_names <- function(form_labels,DB){
+  return(
+    DB$metadata$forms$form_name[
+      match(
+        x = form_labels,
+        table = DB$metadata$forms$form_label
+      )
+    ]
+  )
+}
 #' @title field_names_to_field_labels
 #' @export
 field_names_to_field_labels <- function(field_names,DB){
