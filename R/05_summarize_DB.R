@@ -283,6 +283,7 @@ DF_list_to_text <- function(DF_list, DB,drop_nas = T,clean_names= T){
         entry <- DF[j, col_name]
         if (!col_name %in% key_col_names) {
           if(!is.na(entry)|!drop_nas){
+            entry <- gsub("\\n","<br>",entry)
             col_name_clean <- col_name
             if(clean_names)col_name_clean <- DB$metadata$fields$field_label[which(DB$metadata$fields$field_name==col_name)]
             output_list <- c(output_list, paste0("&nbsp;&nbsp;<strong>", col_name_clean, ":</strong> <br>&nbsp;&nbsp;&nbsp;&nbsp;", entry,"<br>"))
