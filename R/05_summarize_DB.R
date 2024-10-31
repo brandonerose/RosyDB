@@ -65,6 +65,30 @@ form_names_to_field_names <- function(form_names,DB){
   }
   return(unique(field_names))
 }
+#' @title form_names_to_form_labels
+#' @export
+form_names_to_form_labels <- function(form_names,DB){
+  return(
+    DB$metadata$forms$form_label[
+      match(
+        x = form_names,
+        table = DB$metadata$forms$form_name
+      )
+    ]
+  )
+}
+#' @title field_names_to_field_labels
+#' @export
+field_names_to_field_labels <- function(field_names,DB){
+  return(
+    DB$metadata$fields$field_label[
+      match(
+        x = field_names,
+        table = DB$metadata$fields$field_name
+      )
+    ]
+  )
+}
 #' @export
 construct_header_list <- function(DF_list,md_elements = c("form_name","field_type","field_label"),fields){
   if(anyDuplicated(fields$field_name)>0)stop("dup names not allowed in fields")
@@ -92,6 +116,8 @@ stripped_DB <- function (DB) {
   DB$data_update <- list()
   return(DB)
 }
+#' @title filter_DF_list
+#' @export
 filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F){
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
