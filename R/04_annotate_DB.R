@@ -212,9 +212,12 @@ clean_DB <- function(DB,drop_blanks=F,other_drops=NULL){
     bullet_in_console("Already Clean",bullet_type = "v")
     return(DB)
   }
-  for(FORM in names(DB$data)){
-    DB$data[[FORM]] <- DB$data[[FORM]] %>% clean_DF(fields=DB$metadata$fields,drop_blanks= drop_blanks,other_drops=other_drops)
-  }
+  DB$data <- clean_DF_list(
+    DF_list = DB$data,
+    fields = DB$metadata$fields,
+    drop_blanks = drop_blanks,
+    other_drops = other_drops
+  )
   DB$internals$is_clean <- T
   return(DB)
 }
@@ -225,6 +228,20 @@ reverse_clean_DB <- function(DB){
   DB$data_update <-DB$data_update %>% all_character_cols_list()
   DB$internals$is_clean <- F
   return(DB)
+}
+#' @title clean_DF_list
+#' @export
+clean_DF_list <- function(DF_list,fields,drop_blanks = T,other_drops = NULL){
+  #add check for DF_list#
+  for(TABLE in names(DF_list)){
+    DF_list[[TABLE]] <- clean_DF(
+      DF = DF_list[[TABLE]],
+      fields = fields,
+      drop_blanks = drop_blanks,
+      other_drops = other_drops
+    )
+  }
+  return(DF_list)
 }
 #' @title clean_DF
 #' @export
@@ -256,7 +273,7 @@ clean_DF <- function(DF,fields,drop_blanks = T,other_drops = NULL){
             levels <- levels[which(levels%in%unique(DF[[COLUMN]]))]
           }
           if(!is.null(other_drops)){
-            levels <- levels[which(!levels%in%other_drops)]
+            if(length(other_drops)>0)levels <- levels[which(!levels%in%other_drops)]
           }
         }
         if(class == "integer"){

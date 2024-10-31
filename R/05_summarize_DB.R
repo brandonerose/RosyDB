@@ -92,6 +92,39 @@ stripped_DB <- function (DB) {
   DB$data_update <- list()
   return(DB)
 }
+filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F){
+  if(missing(field_names))field_names <- DB %>% get_all_field_names()
+  if(is.null(field_names))field_names <- DB %>% get_all_field_names()
+  if(missing(form_names))form_names <- names(DF_list)
+  if(is.null(form_names))form_names <- names(DF_list)
+  out_list <- list()
+  form_key_cols <- DB$metadata$form_key_cols %>% unlist() %>% unique()
+  is_key <- filter_field %in% form_key_cols
+  if(!is_key){
+    form_name <- field_names_to_form_names(DB,field_names = filter_field)
+    is_repeating_filter <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==form_name)]
+  }
+  for(FORM in form_names){
+    DF <- DF_list[[FORM]]
+    is_repeating_form <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==FORM)]
+    if(is_something(DF)){
+      filter_field_final <- filter_field
+      filter_choices_final <- filter_choices
+      if(!is_key){
+        if(is_repeating_filter){
+          if(!is_repeating_form){
+            filter_field_final <- DB$metadata$form_key_cols[[FORM]]
+            filter_choices_final <- DF_list[[form_name]][[filter_field_final]][which(DF_list[[form_name]][[filter_field]]%in%filter_choices)] %>% unique()
+          }
+        }
+      }
+      rows <-which(DF_list[[FORM]][[filter_field_final]]%in%filter_choices_final)
+      cols <- colnames(DF)[which(colnames(DF)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
+      if(length(rows)>0&&length(cols)>0)out_list[[FORM]] <- DF[rows,cols]
+    }
+  }
+  return(out_list)
+}
 #' @title Select REDCap records from DB
 #' @param field_names character vector of field_names to be included
 #' @param form_names character vector of form_names to be included
@@ -105,33 +138,17 @@ filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names,
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
   if(is.null(form_names))form_names <- names(DB$data)
-  selected <- list()
-  form_key_cols <- DB$metadata$form_key_cols %>% unlist() %>% unique()
-  is_key <- filter_field %in% form_key_cols
-  if(!is_key){
-    form_name <- field_names_to_form_names(DB,field_names = filter_field)
-    is_repeating_filter <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==form_name)]
-  }
-  for(FORM in form_names){
-    DF <- DB$data[[FORM]]
-    is_repeating_form <- DB$metadata$forms$repeating[which(DB$metadata$forms$form_name==FORM)]
-    if(is_something(DF)){
-      filter_field_final <- filter_field
-      filter_choices_final <- filter_choices
-      if(!is_key){
-        if(is_repeating_filter){
-          if(!is_repeating_form){
-            filter_field_final <- DB$metadata$form_key_cols[[FORM]]
-            filter_choices_final <- DB$data[[form_name]][[filter_field_final]][which(DB$data[[form_name]][[filter_field]]%in%filter_choices)] %>% unique()
-          }
-        }
-      }
-      rows <-which(DB$data[[FORM]][[filter_field_final]]%in%filter_choices_final)
-      cols <- colnames(DF)[which(colnames(DF)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
-      if(length(rows)>0&&length(cols)>0)selected[[FORM]] <- DF[rows,cols]
-    }
-  }
-  return(selected)
+  return(
+    filter_DF_list(
+      DF_list = DB$data,
+      DB = DB,
+      filter_field = filter_field,
+      filter_choices = filter_choices,
+      form_names = form_names,
+      field_names = field_names,
+      warn_only = warn_only
+    )
+  )
 }
 field_names_metadata <- function(DB,field_names,col_names){
   fields <- get_original_fields(DB) #DB$metadata$fields
