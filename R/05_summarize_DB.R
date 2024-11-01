@@ -351,3 +351,23 @@ DF_list_to_text <- function(DF_list, DB,drop_nas = T,clean_names= T){
   }
   return(output_list)
 }
+#' @title check_DB_for_IDs
+#' @export
+check_DB_for_IDs <- function(DB,required_percent_filled = 0.7){
+  cols <- NULL
+  if(is_something(DB)){
+    if(is_something(DB$data)){
+      DF <- DB$data[[DB$metadata$forms$form_name[which(!DB$metadata$forms$repeating)][[1]]]]
+      IN_length <- DF %>% nrow()
+      cols <- colnames(DF)[DF %>% sapply(function(IN){
+        OUT <- F
+        x <- IN %>% drop_nas()
+        if((length(x)/IN_length)>required_percent_filled){
+          OUT <- anyDuplicated(x)==0
+        }
+        return(OUT)
+      }) %>% unlist() %>% which()]
+    }
+  }
+  return(cols)
+}
