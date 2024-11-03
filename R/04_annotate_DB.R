@@ -321,10 +321,18 @@ clean_column_for_table <- function(col,class,label,units,levels){
     }
   }
   if(!missing(label)){
-    attr(col, "label") <- label
+    if (!is.null(label)) {
+      if(!is.na(label)){
+        attr(col, "label") <- label
+      }
+    }
   }
   if(!missing(units)){
-    attr(col, "units") <- units
+    if (!is.null(units)) {
+      if(!is.na(units)){
+        attr(col, "units") <- units
+      }
+    }
   }
   col
 }
