@@ -94,7 +94,7 @@ validate_DB <- function(DB,silent = T,warn_only = F,allowed_names = names(blank_
     if(outcome_valid){
       bullet_in_console(DB$short_name," is valid DB object!",bullet_type = "v")
     }
-    bullet_in_console(DB$short_name %>% paste0(" loaded from: "),file = DB$dir_path,bullet_type = "v")
+    bullet_in_console(DB$short_name %>% paste0(" loaded from: "),url = DB$dir_path,bullet_type = "v")
     if(DB$internals$is_transformed){
       bullet_in_console(DB$short_name %>% paste0(" is currently transformed! Can reverse with `untransform_DB(DB)`"),bullet_type = "i")
     }
@@ -157,7 +157,7 @@ save_DB <- function(DB){
   DB %>% saveRDS(file=file.path(DB$dir_path,"R_objects",paste0(DB$short_name,".rdata")))
   add_project(DB)
   # save_xls_wrapper(DB)
-  bullet_in_console(paste0("Saved ",DB$short_name," to directory!"),file = DB$dir_path,bullet_type = "v")
+  bullet_in_console(paste0("Saved ",DB$short_name," to directory!"),url = DB$dir_path,bullet_type = "v")
 }
 #' @title Shows DB in the env
 #' @inheritParams save_DB
