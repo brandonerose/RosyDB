@@ -4,7 +4,7 @@
 \alias{untransform_DB}
 \title{untransform_DB}
 \usage{
-untransform_DB(DB)
+untransform_DB(DB, allow_partial = F)
 }
 \description{
 untransform_DB

@@ -450,7 +450,7 @@ transform_DB <- function(DB,ask = T){
 }
 #' @title untransform_DB
 #' @export
-untransform_DB <- function(DB){
+untransform_DB <- function(DB,allow_partial = F){
   if(!DB$internals$is_transformed){
     bullet_in_console("Already not transformed... nothing to do!",bullet_type = "x")
     return(DB)
@@ -461,14 +461,24 @@ untransform_DB <- function(DB){
   original_fields <- DB$metadata$fields
   keys <- DB$metadata$form_key_cols
   OUT <- NULL
-  if(any(!original_form_names%in%forms_transformation$form_name))stop("Must have all original form names in transformation!")
+  if(!allow_partial){
+    if(any(!original_form_names%in%forms_transformation$form_name))stop("Must have all original form names in transformation!")
+  }
   # TABLE <- original_form_names%>%sample1()
   for(TABLE in original_form_names){
-    DF <- named_df_list[[forms_transformation$form_name_remap[which(forms_transformation$form_name==TABLE)]]]
-    COLS <- DB$transformation$original_col_names[[TABLE]]
-    if(any(!COLS%in%colnames(DF)))stop("Missing cols from orginal DF transformation... ",TABLE)
-    DF <- DF[,COLS]
-    OUT[[TABLE]] <- DF
+    is_in_DB <- TABLE %in% names(named_df_list)
+    if(!is_in_DB&&!allow_partial){
+      stop("Must have all original form names in transformation!")
+    }
+    if(is_in_DB){
+      DF <- named_df_list[[forms_transformation$form_name_remap[which(forms_transformation$form_name==TABLE)]]]
+      COLS <- DB$transformation$original_col_names[[TABLE]]
+      if(!allow_partial){
+        if(any(!COLS%in%colnames(DF)))stop("Missing cols from orginal DF transformation... ",TABLE)
+      }
+      DF <- DF[,COLS]
+      OUT[[TABLE]] <- DF
+    }
   }
   DB$data <- OUT
   DB$internals$is_transformed <- F
