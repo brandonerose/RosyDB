@@ -10,7 +10,7 @@ validate_dir <- function(dir_path,silent=T){
     if ( ! file.exists(file.path(dir_path,folder))) stop("'",dir_path,"/",folder,"' missing! ",stop_mes)
   }
   # if ( ! file.exists(file.path(dir_path,"ref_tables"))) stop("'",dir_path,"/ref_tables' missing! ",stop_mes)
-  if( ! silent) bullet_in_console("Directory is Valid!",file=dir_path,bullet_type = "v")
+  if( ! silent) bullet_in_console("Directory is Valid!",url=dir_path,bullet_type = "v")
   dir_path
 }
 clean_dir_path <- function(dir_path){

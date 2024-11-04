@@ -130,7 +130,7 @@ stripped_DB <- function (DB) {
 }
 #' @title filter_DF_list
 #' @export
-filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F){
+filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F, untransform = F){
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DF_list)
@@ -171,7 +171,7 @@ filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, 
 #' @param warn_only logical for warn_only or stop
 #' @return DB object that has been filtered to only include the specified records
 #' @export
-filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F){#, ignore_incomplete=F, ignore_unverified = F
+filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F, untransform = F){#, ignore_incomplete=F, ignore_unverified = F
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
@@ -184,7 +184,8 @@ filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names,
       filter_choices = filter_choices,
       form_names = form_names,
       field_names = field_names,
-      warn_only = warn_only
+      warn_only = warn_only,
+      untransform = untransform
     )
   )
 }
