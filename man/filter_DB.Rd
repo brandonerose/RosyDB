@@ -11,7 +11,7 @@ filter_DB(
   form_names,
   field_names,
   warn_only = F,
-  untransform = F
+  no_duplicate_cols = F
 )
 }
 \arguments{

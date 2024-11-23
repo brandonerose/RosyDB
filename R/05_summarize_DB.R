@@ -57,9 +57,13 @@ field_names_to_form_names <- function(DB,field_names){
 }
 #' @title form_names_to_field_names
 #' @export
-form_names_to_field_names <- function(form_names,DB){
+form_names_to_field_names <- function(form_names,DB,original_only = F){
   field_names <- NULL
-  fields <- get_original_fields(DB) #DB$metadata$fields
+  if(original_only){
+    fields <- get_original_fields(DB)
+  }else{
+    fields <- DB$metadata$fields
+  }
   for(form_name in form_names){
     field_names <- field_names %>% append(fields$field_name[which(fields$form_name==form_name)])
   }
@@ -120,7 +124,7 @@ construct_header_list <- function(DF_list,md_elements = c("form_name","field_typ
   })
   return(header_df_list)
 }
-#' @title form_names_to_field_names
+#' @title stripped_DB
 #' @export
 stripped_DB <- function (DB) {
   DB$redcap$log <- list()
@@ -130,7 +134,7 @@ stripped_DB <- function (DB) {
 }
 #' @title filter_DF_list
 #' @export
-filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F, untransform = F){
+filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, field_names, warn_only = F, no_duplicate_cols = F){
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DF_list)
@@ -157,8 +161,13 @@ filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, 
         }
       }
       rows <-which(DF_list[[FORM]][[filter_field_final]]%in%filter_choices_final)
-      cols <- colnames(DF)[which(colnames(DF)%in%c(DB$metadata$form_key_cols[[FORM]],field_names))]
-      if(length(rows)>0&&length(cols)>0)out_list[[FORM]] <- DF[rows,cols]
+      field_names_adj <- field_names
+      if(no_duplicate_cols) field_names_adj <- field_names_adj %>% vec1_in_vec2(form_names_to_field_names(FORM,DB,original_only = F))
+      cols <- colnames(DF)[which(colnames(DF)%in%field_names_adj)]
+      if(length(rows)>0&&length(cols)>0){
+        cols <- colnames(DF)[which(colnames(DF)%in%unique(c(DB$metadata$form_key_cols[[FORM]],field_names_adj)))]
+        out_list[[FORM]] <- DF[rows,cols]
+      }
     }
   }
   return(out_list)
@@ -171,7 +180,7 @@ filter_DF_list <- function(DF_list,DB,filter_field, filter_choices, form_names, 
 #' @param warn_only logical for warn_only or stop
 #' @return DB object that has been filtered to only include the specified records
 #' @export
-filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F, untransform = F){#, ignore_incomplete=F, ignore_unverified = F
+filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names, warn_only = F, no_duplicate_cols = F){#, ignore_incomplete=F, ignore_unverified = F
   if(missing(field_names))field_names <- DB %>% get_all_field_names()
   if(is.null(field_names))field_names <- DB %>% get_all_field_names()
   if(missing(form_names))form_names <- names(DB$data)
@@ -185,7 +194,7 @@ filter_DB <- function(DB, filter_field, filter_choices, form_names, field_names,
       form_names = form_names,
       field_names = field_names,
       warn_only = warn_only,
-      untransform = untransform
+      no_duplicate_cols = no_duplicate_cols
     )
   )
 }

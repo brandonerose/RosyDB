@@ -2,10 +2,10 @@
 % Please edit documentation in R/05_summarize_DB.R
 \name{stripped_DB}
 \alias{stripped_DB}
-\title{form_names_to_field_names}
+\title{stripped_DB}
 \usage{
 stripped_DB(DB)
 }
 \description{
-form_names_to_field_names
+stripped_DB
 }

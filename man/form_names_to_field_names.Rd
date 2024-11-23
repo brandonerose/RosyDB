@@ -4,7 +4,7 @@
 \alias{form_names_to_field_names}
 \title{form_names_to_field_names}
 \usage{
-form_names_to_field_names(form_names, DB)
+form_names_to_field_names(form_names, DB, original_only = F)
 }
 \description{
 form_names_to_field_names
