@@ -472,8 +472,13 @@ untransform_DB <- function(DB,allow_partial = F){
     }
     if(is_in_DB){
       DF <- named_df_list[[forms_transformation$form_name_remap[which(forms_transformation$form_name==TABLE)]]]
-      COLS <- DB$transformation$original_col_names[[TABLE]]
-      if(!allow_partial){
+      COLS <- c(
+        DB$metadata$form_key_cols[[TABLE]],
+        DB$transformation$original_col_names[[TABLE]]
+      ) %>% unique()
+      if(allow_partial){
+        COLS <- colnames(DF) %>% vec1_in_vec2(COLS)
+      }else{
         if(any(!COLS%in%colnames(DF)))stop("Missing cols from orginal DF transformation... ",TABLE)
       }
       DF <- DF[,COLS]
